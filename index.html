@@ -1310,7 +1310,7 @@ function buildVK1(t){const L=VK1.L;if(!L)return;const el=document.getElementById
  const geo=k=>{const m=VK_META[k],[o1,o2,o3]=m.o,q=new Int16Array(BUF,o1,m.nv*3),u=new Uint16Array(BUF,o2,m.nv*2),I=m.nv<65536?new Uint16Array(BUF,o3,m.ni):new Uint32Array(BUF,o3,m.ni);
   const P=new Float32Array(m.nv*3),U=new Float32Array(m.nv*2);for(let i=0;i<P.length;i++)P[i]=q[i]/5000;for(let i=0;i<U.length;i++)U[i]=u[i]/65535;
   let g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(P,3));g.setAttribute('uv',new THREE.BufferAttribute(U,2));g.setIndex(new THREE.BufferAttribute(I.slice(),1));g=g.toNonIndexed();g.computeVertexNormals();return g;};
- const mt=k=>{const im=new Image(),tx=new THREE.Texture(im);im.onload=()=>{tx.needsUpdate=true;};im.src=VK_META[k].tex+'?v=2ef49e6502';tx.anisotropy=4;return new THREE.MeshLambertMaterial({map:tx});};
+ const mt=k=>{const im=new Image(),tx=new THREE.Texture(im);im.onload=()=>{tx.needsUpdate=true;};im.src=VK_META[k].tex+'?v=f83a3fe0d0';tx.anisotropy=4;return new THREE.MeshLambertMaterial({map:tx});};
  const by={};for(const p of L.list)(by[p.k]=by[p.k]||[]).push(p);
  const m4=new THREE.Matrix4(),q=new THREE.Quaternion(),e=new THREE.Euler(),v=new THREE.Vector3(),sc=new THREE.Vector3();
  for(const k in by){const arr=by[k],im=new THREE.InstancedMesh(geo(k),mt(k),arr.length);arr.forEach((p,i)=>{const x=t.x+p.x,z=t.y+p.z;q.setFromEuler(e.set(0,p.r,0));m4.compose(v.set(x,hAt(x,z),z),q,sc.set(p.s,p.s,p.s));im.setMatrixAt(i,m4);});
@@ -1507,7 +1507,7 @@ function geos(){
 }
 function M(geo,material,sx,sy,sz){const m=new THREE.Mesh(geo,material);if(sx!==undefined)m.scale.set(sx,sy===undefined?sx:sy,sz===undefined?sx:sz);return m;}
 function at(o,x,y,z){o.position.set(x,y,z);return o;}
-let GFX='high';try{GFX=localStorage.getItem('dk-gfx')==='low'?'low':'high';}catch(e){}
+let GFX='high';try{GFX=localStorage.getItem('dk-gfx')==='low'?'low':'high';if(!localStorage.getItem('dk-gfx2')){localStorage.setItem('dk-gfx2','1');localStorage.setItem('dk-gfx','high');GFX='high';}}catch(e){}
 let sun=null,shake=0;const NO_MOTION=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 function addShake(a){if(!NO_MOTION&&GFX==='high')shake=Math.max(shake,a);}
 function shadowize(o){o.traverse(c=>{if(c.isMesh&&c.material&&!c.material.transparent)c.castShadow=true;});return o;}
@@ -2234,7 +2234,7 @@ function hkTwoHand(h,K,B,WQ,WP,par){const U=K.armB[1][0],F=K.armB[1][1],Hn=K.han
 let _hkLT=0;
 // far / off-screen characters animate less often (each keeps its own clock so motion speed stays right)
 const _lodS=new THREE.Sphere(new THREE.Vector3(),45);
-function hkLod(h,now,dtG,me){if(me||!P){h._lt=now;return dtG;}const rp=h.root.position,d=Math.hypot(rp.x-P.x,rp.z-P.y);let iv=d<320?0:d<650?.05:.1;
+function hkLod(h,now,dtG,me){if(me||!P){h._lt=now;return dtG;}const rp=h.root.position,d=Math.hypot(rp.x-P.x,rp.z-P.y);let iv=d<520?0:d<900?.034:.07;
  try{_lodS.center.set(rp.x,rp.y+20,rp.z);if(!_fr.intersectsSphere(_lodS))iv=.6;}catch(e){}if(GFX!=='high')iv=Math.max(iv,d<320?0:.07);
  const last=h._lt||0;if(last&&now-last<iv*1000)return -1;h._lt=now;return last?Math.min(.1,(now-last)/1000):dtG;}
 function hkTickAll(){hkaInit();const now=performance.now(),dtG=_hkLT?Math.min(.1,(now-_hkLT)/1000):0;_hkLT=now;
@@ -6212,10 +6212,9 @@ function startGame(s,cls,name,sex){
 /* ---------- loop ---------- */
 let lastT=performance.now();
 // adaptive resolution: lowers render scale when the phone can't keep ~45 fps, raises it back when there is headroom
-const ADR={hi:1.5,acc:0,n:0};
+const ADR={hi:1.75,acc:0,n:0};
 function adrTick(raw){if(!running||paused||document.hidden||raw>.25)return;ADR.acc+=raw;ADR.n++;if(ADR.acc<2.5)return;const fps=ADR.n/ADR.acc;ADR.acc=0;ADR.n=0;
- if(GFX==='high'&&ADR.hi<=1.001&&fps<34){ADR.low=(ADR.low||0)+1;if(ADR.low>=3){ADR.low=0;setGfx('low');toast('Įjungta taupi grafika, kad žaidimas nestrigtų (galite pakeisti nustatymuose)',true);return;}}else ADR.low=0;
- const o=ADR.hi;if(fps<42)ADR.hi=Math.max(1,ADR.hi-.15);else if(fps>56)ADR.hi=Math.min(1.5,ADR.hi+.1);if(Math.abs(o-ADR.hi)>.01&&renderer&&GFX==='high')resize();}
+ const o=ADR.hi;if(fps<40)ADR.hi=Math.max(1.3,ADR.hi-.15);else if(fps>55)ADR.hi=Math.min(1.75,ADR.hi+.1);if(Math.abs(o-ADR.hi)>.01&&renderer&&GFX==='high')resize();}
 function frame(now){if(GFX!=='high'&&now-lastT<30){requestAnimationFrame(frame);return;}adrTick((now-lastT)/1000);let dt=Math.min(.05,(now-lastT)/1000);lastT=now;punch=Math.max(0,punch-dt*2.6);if(slowT>0){slowT-=dt;dt*=.35;}
  if(running&&P){if(!paused)update(dt);else T+=dt;syncScene(dt);hkTickAll();renderer.render(scene,camera);drawOverlay();hud();if(!$('#sheet').hidden&&sheetTab==='items')renderPreview(dt);if(!$('#mapScr').hidden)drawBigMap();miniT-=dt;if(miniT<=0){miniT=.25;drawMini();}}
  requestAnimationFrame(frame);}
@@ -6224,7 +6223,7 @@ function boot(data){
  try{renderer=new THREE.WebGLRenderer({canvas:cv,antialias:GFX==='high',powerPreference:'high-performance'});}catch(e){$('#loading').textContent='Šis įrenginys nepalaiko 3D grafikos (WebGL).';return;}
  scene=new THREE.Scene();scene.background=new THREE.Color('#e9c896');scene.fog=new THREE.Fog('#e9c896',500,1200);
  camera=new THREE.PerspectiveCamera(50,1,5,3000);
- renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFShadowMap;
+ renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
  hemi=new THREE.HemisphereLight('#fff0d8','#a8703c',.72);scene.add(hemi);sun=new THREE.DirectionalLight('#ffe4b4',.95);sun.position.set(-300,420,260);scene.add(sun);scene.add(sun.target);
  sun.castShadow=GFX==='high';sun.shadow.mapSize.set(1024,1024);const sc0=sun.shadow.camera;sc0.left=-540;sc0.right=540;sc0.top=540;sc0.bottom=-540;sc0.near=40;sc0.far=1500;sc0.updateProjectionMatrix();sun.shadow.bias=-.0008;sun.shadow.normalBias=1.2;
  geos();buildTerrain();buildWorld();buildArenaAll();for(const s of solids)addSolid(s.x,s.y,s.r);solids.length=0;buildLife();initAtmos();initExtras();npcBodies.forEach((b,i)=>b.userData.ph=i);resize();
@@ -6236,7 +6235,7 @@ window.claude?.hot?.snapshot?.(()=>({state:running?serialize():null}));
 window.claude?.hot?.ready?window.claude.hot.ready(boot):boot(window.claude?.hot?.data??{});
 </script>
 <div id="pkLoad" style="position:fixed;left:0;right:0;bottom:calc(env(safe-area-inset-bottom,0px) + 18px);text-align:center;z-index:9999;font:600 14px system-ui,sans-serif;color:#f3e6c8;text-shadow:0 1px 3px #000;pointer-events:none">Kraunama… <span id="pkPct">0</span>%</div>
-<script>window.__PK={};(function(){const L={"vegData": "d/veg.bin?v=2ef49e6502", "vkPk": "d/vk.bin?v=2ef49e6502", "heroAn": "d/anim.bin?v=2ef49e6502", "heroPk": "d/hero.bin?v=2ef49e6502", "townPk": "d/town.bin?v=2ef49e6502", "dragonPk": "d/dragon.bin?v=2ef49e6502", "dgkPk": "d/dgk.bin?v=2ef49e6502"},sizes={"vegData": 1878408, "vkPk": 1088548, "heroAn": 662544, "heroPk": 3287460, "townPk": 392700, "dragonPk": 269688, "dgkPk": 1214946};let tot=0;const cur={};for(const k in sizes)tot+=sizes[k];
+<script>window.__PK={};(function(){const L={"vegData": "d/veg.bin?v=f83a3fe0d0", "vkPk": "d/vk.bin?v=f83a3fe0d0", "heroAn": "d/anim.bin?v=f83a3fe0d0", "heroPk": "d/hero.bin?v=f83a3fe0d0", "townPk": "d/town.bin?v=f83a3fe0d0", "dragonPk": "d/dragon.bin?v=f83a3fe0d0", "dgkPk": "d/dgk.bin?v=f83a3fe0d0"},sizes={"vegData": 1878408, "vkPk": 1088548, "heroAn": 662544, "heroPk": 3287460, "townPk": 392700, "dragonPk": 269688, "dgkPk": 1214946};let tot=0;const cur={};for(const k in sizes)tot+=sizes[k];
 const pct=()=>{const e=document.getElementById('pkPct');if(e&&tot)e.textContent=Math.min(99,Math.round(Object.values(cur).reduce((a,b)=>a+b,0)/tot*100));};
 const get=(id,u)=>fetch(u).then(r=>{if(!r.ok)throw new Error(u+' '+r.status);if(!r.body||!r.body.getReader)return r.arrayBuffer().then(b=>{cur[id]=b.byteLength;pct();return b;});
  const rd=r.body.getReader(),parts=[];let n=0;const pump=()=>rd.read().then(({done,value})=>{if(done){const o=new Uint8Array(n);let p=0;for(const c of parts){o.set(c,p);p+=c.length;}return o.buffer;}parts.push(value);n+=value.length;cur[id]=n;pct();return pump();});return pump();});
