@@ -1310,7 +1310,7 @@ function buildVK1(t){const L=VK1.L;if(!L)return;const el=document.getElementById
  const geo=k=>{const m=VK_META[k],[o1,o2,o3]=m.o,q=new Int16Array(BUF,o1,m.nv*3),u=new Uint16Array(BUF,o2,m.nv*2),I=m.nv<65536?new Uint16Array(BUF,o3,m.ni):new Uint32Array(BUF,o3,m.ni);
   const P=new Float32Array(m.nv*3),U=new Float32Array(m.nv*2);for(let i=0;i<P.length;i++)P[i]=q[i]/5000;for(let i=0;i<U.length;i++)U[i]=u[i]/65535;
   let g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(P,3));g.setAttribute('uv',new THREE.BufferAttribute(U,2));g.setIndex(new THREE.BufferAttribute(I.slice(),1));g=g.toNonIndexed();g.computeVertexNormals();return g;};
- const mt=k=>{const im=new Image(),tx=new THREE.Texture(im);im.onload=()=>{tx.needsUpdate=true;};im.src=VK_META[k].tex+'?v=3d5ab7ea4d';tx.anisotropy=4;return new THREE.MeshLambertMaterial({map:tx});};
+ const mt=k=>{const im=new Image(),tx=new THREE.Texture(im);im.onload=()=>{tx.needsUpdate=true;};im.src=VK_META[k].tex+'?v=3414b85298';tx.anisotropy=4;return new THREE.MeshLambertMaterial({map:tx});};
  const by={};for(const p of L.list)(by[p.k]=by[p.k]||[]).push(p);
  const m4=new THREE.Matrix4(),q=new THREE.Quaternion(),e=new THREE.Euler(),v=new THREE.Vector3(),sc=new THREE.Vector3();
  for(const k in by){const arr=by[k],im=new THREE.InstancedMesh(geo(k),mt(k),arr.length);arr.forEach((p,i)=>{const x=t.x+p.x,z=t.y+p.z;q.setFromEuler(e.set(0,p.r,0));m4.compose(v.set(x,hAt(x,z),z),q,sc.set(p.s,p.s,p.s));im.setMatrixAt(i,m4);});
@@ -1523,8 +1523,17 @@ const ISL=[[8800,13000,7600,7200],[5200,8200,4200,3600],[7000,18500,4200,3200],[
  ISLETS=[[2600,2600,900,650],[1700,21200,800,560],[25400,22300,900,480],[46900,19400,520,900],[19000,700,700,420],[34500,1500,800,500]];
 for(const b of ISL.concat(ISLETS)){b[0]*=WS;b[1]*=WS;b[2]*=WS;b[3]*=WS;}
 const SCW=a=>a.map(p=>[p[0]*WS,p[1]*WS]);
-function landF(x,z){let f=-1;for(const b of ISL.concat(ISLETS)){const dx=(x-b[0])/b[2],dz=(z-b[1])/b[3];const v=1-(dx*dx+dz*dz);if(v>f)f=v;}
- return f+(vnoise(x/3000+3,z/3000+8)-.5)*.42+(vnoise(x/900+1,z/900+5)-.5)*.16+(vnoise(x/260+7,z/260+2)-.5)*.05;}
+// coastline: island ellipses on warped coordinates + several noise layers give bays, capes and peninsulas;
+// towns, monster zones, temples and bridge ends are kept on land, the two sea dungeons stay in open water
+const ISLA=ISL.concat(ISLETS);let _lfP=null;
+function landProt(){if(_lfP)return _lfP;const L=[];for(const t of TOWNS)L.push([t.x,t.y,t.r+1200]);for(const s of SPAWNS)L.push([s.x,s.y,(s.r||500)+(s.fill?150:500)]);
+ for(const o of [OASIS,TEMPLE,TEMPLE2])L.push([o.x,o.y,1100]);L.push([40625,6000,700],[42724,2432,600]);const G=new Map();for(const p of L){const r=p[2];for(let a=Math.floor((p[0]-r)/2000);a<=Math.floor((p[0]+r)/2000);a++)for(let b=Math.floor((p[1]-r)/2000);b<=Math.floor((p[1]+r)/2000);b++){const k=a*1000+b;if(!G.has(k))G.set(k,[]);G.get(k).push(p);}}_lfP=G;return G;}
+function landF(x,z){const wx=x+(vnoise(x/6500+11,z/6500+3)-.5)*4200,wz=z+(vnoise(x/6500+5,z/6500+17)-.5)*4200;let f=-1;
+ for(const b of ISLA){const dx=(wx-b[0])/b[2],dz=(wz-b[1])/b[3];const v=1-(dx*dx+dz*dz);if(v>f)f=v;}
+ f+=(vnoise(x/3000+3,z/3000+8)-.5)*.42+(vnoise(x/1400+9,z/1400+4)-.5)*.3+(vnoise(x/560+1,z/560+5)-.5)*.13+(vnoise(x/220+7,z/220+2)-.5)*.05;
+ if(f<.5&&f>-.9){const pl=landProt().get(Math.floor(x/2000)*1000+Math.floor(z/2000));if(pl)for(const p of pl){const dx=x-p[0],dz=z-p[1],r2=p[2]*p[2],d2=dx*dx+dz*dz;if(d2<r2){const k=.5*(1-d2/r2);if(k>f)f=k;}}}
+ if((x>5000&&x<8200&&z>1000&&z<4200)||(x>8300&&x<11500&&z>2000&&z<5200))f=Math.min(f,-.5);
+ return f;}
 function crSmooth(p,n){const o=[];for(let i=0;i<p.length-1;i++){const p0=p[Math.max(0,i-1)],p1=p[i],p2=p[i+1],p3=p[Math.min(p.length-1,i+2)];
  for(let k=0;k<n;k++){const t=k/n,t2=t*t,t3=t2*t;const f=(a,b,c,d)=>.5*((2*b)+(-a+c)*t+(2*a-5*b+4*c-d)*t2+(-a+3*b-3*c+d)*t3);o.push([f(p0[0],p1[0],p2[0],p3[0]),f(p0[1],p1[1],p2[1],p3[1])]);}}o.push(p[p.length-1]);return o;}
 function mkPL(pts){let L=0;const s=[];for(let i=0;i<pts.length-1;i++){const a=pts[i],b=pts[i+1],l=Math.hypot(b[0]-a[0],b[1]-a[1]);s.push({ax:a[0],ay:a[1],dx:b[0]-a[0],dy:b[1]-a[1],l,l0:L});L+=l;}return{s,L,pts};}
@@ -6251,7 +6260,7 @@ window.claude?.hot?.snapshot?.(()=>({state:running?serialize():null}));
 window.claude?.hot?.ready?window.claude.hot.ready(boot):boot(window.claude?.hot?.data??{});
 </script>
 <div id="pkLoad" style="position:fixed;left:0;right:0;bottom:calc(env(safe-area-inset-bottom,0px) + 18px);text-align:center;z-index:9999;font:600 14px system-ui,sans-serif;color:#f3e6c8;text-shadow:0 1px 3px #000;pointer-events:none">Kraunama… <span id="pkPct">0</span>%</div>
-<script>window.__PK={};(function(){const L={"vegData": "d/veg.bin?v=3d5ab7ea4d", "vkPk": "d/vk.bin?v=3d5ab7ea4d", "heroAn": "d/anim.bin?v=3d5ab7ea4d", "heroPk": "d/hero.bin?v=3d5ab7ea4d", "townPk": "d/town.bin?v=3d5ab7ea4d", "dragonPk": "d/dragon.bin?v=3d5ab7ea4d", "dgkPk": "d/dgk.bin?v=3d5ab7ea4d"},sizes={"vegData": 1878408, "vkPk": 1088548, "heroAn": 662544, "heroPk": 3287460, "townPk": 392700, "dragonPk": 269688, "dgkPk": 1214946};let tot=0;const cur={};for(const k in sizes)tot+=sizes[k];
+<script>window.__PK={};(function(){const L={"vegData": "d/veg.bin?v=3414b85298", "vkPk": "d/vk.bin?v=3414b85298", "heroAn": "d/anim.bin?v=3414b85298", "heroPk": "d/hero.bin?v=3414b85298", "townPk": "d/town.bin?v=3414b85298", "dragonPk": "d/dragon.bin?v=3414b85298", "dgkPk": "d/dgk.bin?v=3414b85298"},sizes={"vegData": 1878408, "vkPk": 1088548, "heroAn": 662544, "heroPk": 3287460, "townPk": 392700, "dragonPk": 269688, "dgkPk": 1214946};let tot=0;const cur={};for(const k in sizes)tot+=sizes[k];
 const pct=()=>{const e=document.getElementById('pkPct');if(e&&tot)e.textContent=Math.min(99,Math.round(Object.values(cur).reduce((a,b)=>a+b,0)/tot*100));};
 const get=(id,u)=>fetch(u).then(r=>{if(!r.ok)throw new Error(u+' '+r.status);if(!r.body||!r.body.getReader)return r.arrayBuffer().then(b=>{cur[id]=b.byteLength;pct();return b;});
  const rd=r.body.getReader(),parts=[];let n=0;const pump=()=>rd.read().then(({done,value})=>{if(done){const o=new Uint8Array(n);let p=0;for(const c of parts){o.set(c,p);p+=c.length;}return o.buffer;}parts.push(value);n+=value.length;cur[id]=n;pct();return pump();});return pump();});
