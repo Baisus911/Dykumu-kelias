@@ -1310,7 +1310,7 @@ function buildVK1(t){const L=VK1.L;if(!L)return;const el=document.getElementById
  const geo=k=>{const m=VK_META[k],[o1,o2,o3]=m.o,q=new Int16Array(BUF,o1,m.nv*3),u=new Uint16Array(BUF,o2,m.nv*2),I=m.nv<65536?new Uint16Array(BUF,o3,m.ni):new Uint32Array(BUF,o3,m.ni);
   const P=new Float32Array(m.nv*3),U=new Float32Array(m.nv*2);for(let i=0;i<P.length;i++)P[i]=q[i]/5000;for(let i=0;i<U.length;i++)U[i]=u[i]/65535;
   let g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(P,3));g.setAttribute('uv',new THREE.BufferAttribute(U,2));g.setIndex(new THREE.BufferAttribute(I.slice(),1));g=g.toNonIndexed();g.computeVertexNormals();return g;};
- const mt=k=>{const im=new Image(),tx=new THREE.Texture(im);im.onload=()=>{tx.needsUpdate=true;};im.src=VK_META[k].tex+'?v=4db597fd00';tx.anisotropy=4;return new THREE.MeshLambertMaterial({map:tx});};
+ const mt=k=>{const im=new Image(),tx=new THREE.Texture(im);im.onload=()=>{tx.needsUpdate=true;};im.src=VK_META[k].tex+'?v=91253263cf';tx.anisotropy=4;return new THREE.MeshLambertMaterial({map:tx});};
  const by={};for(const p of L.list)(by[p.k]=by[p.k]||[]).push(p);
  const m4=new THREE.Matrix4(),q=new THREE.Quaternion(),e=new THREE.Euler(),v=new THREE.Vector3(),sc=new THREE.Vector3();
  for(const k in by){const arr=by[k],im=new THREE.InstancedMesh(geo(k),mt(k),arr.length);arr.forEach((p,i)=>{const x=t.x+p.x,z=t.y+p.z;q.setFromEuler(e.set(0,p.r,0));m4.compose(v.set(x,hAt(x,z),z),q,sc.set(p.s,p.s,p.s));im.setMatrixAt(i,m4);});
@@ -2123,7 +2123,7 @@ const wcol=()=>ws.type===3?RAINBOW[(h.wpI=((h.wpI||0)+1)%6)]:ws.type===2?(Math.r
 }
 const FHAIR={swd:'#e8c46a',war:'#a8402a',arc:'#6a3a1a',sha:'#e4e4f0',dag:'#1e1420'};
 /* ---------- modular skinned hero kit (male heroes) ---------- */
-const HK={ok:null,geo:{},live:new Set(),S:20,twoD:15,noTwo:1,staffA:Math.PI/2,orbUp:7,reachU:.5,reachF:.45,qvD:8,adj:{swd:[{t:[0,.5],p:[-1.2,0,0]}],war:[{t:[0,.3],s:-7}],arc:[{p:[1.6,0,0]},null],dag:[{p:[-.6,0,0]},{p:[.6,0,0]}],sha:[null]},
+const HK={ok:null,geo:{},live:new Set(),S:20,twoD:15,noTwo:1,staffA:Math.PI/2,orbUp:7,reachU:.5,reachF:.45,qvD:4.8,adj:{swd:[{t:[0,.5],p:[-1.2,0,0]}],war:[{t:[0,.3],s:-7}],arc:[{p:[1.6,0,0]},null],dag:[{p:[-.6,0,0]},{p:[.6,0,0]}],sha:[null]},
  VAR:{swd:'001',arc:'002',war:'003',dag:'004',sha:'005'},SETS:[null,'B','I','G','DS','M'],
  TONE:{swd:'Light',arc:'Light',war:'Medium',dag:'Medium',sha:'Dark'},
  FACE:{swd:['Hair.006','Beard.006','Eyebrows.001'],war:['Hair.009','Beard.009','Eyebrows.004'],arc:['Hair.008','Mustache.009','Eyebrows.003'],dag:['Hair.007','Mustache.008','Eyebrows.002'],sha:['Hair.010','Beard.010','Eyebrows.005']},
@@ -2154,7 +2154,7 @@ function hkAttach(p,cls){if(!hkInit()||!HK.VAR[cls])return;try{
  D('DEF-upper_arm.R',p.arms[0],null,RR);D('DEF-forearm.R',p.arms[0],p.arms[0].userData.fore,RR);D('DEF-upper_arm.L',p.arms[1],null,RL);D('DEF-forearm.L',p.arms[1],p.arms[1].userData.fore,RL);
  D('DEF-thigh.R',p.legs[0],null,null);D('DEF-shin.R',p.legs[0],p.legs[0].userData.knee,null);D('DEF-thigh.L',p.legs[1],null,null);D('DEF-shin.L',p.legs[1],p.legs[1].userData.knee,null);
  if(p.head)D('DEF-spine.006',p.head,null,null);
- K.sock=[I['Weapon_Socket.R'],I['Weapon_Socket.L']];K.back=I['WeaponBack_Socket.R'];K.handB=[I['DEF-hand.R'],I['DEF-hand.L']];K.wr0=[0,1].map(k=>{const F=k?I['DEF-forearm.L']:I['DEF-forearm.R'],H=k?I['DEF-hand.L']:I['DEF-hand.R'];return Bq[F].clone().invert().multiply(Bq[H]).invert();});K.armB=[[I['DEF-upper_arm.R'],I['DEF-forearm.R']],[I['DEF-upper_arm.L'],I['DEF-forearm.L']]];K.fist=[new THREE.Vector3(.47,-7.4,0),new THREE.Vector3(-.47,-7.4,0)];K.arm0=p.arms.map(a=>a.position.clone());
+ K.sock=[I['Weapon_Socket.R'],I['Weapon_Socket.L']];K.back=I['WeaponBack_Socket.R'];K.chest=I['DEF-spine.003'];K.neck=I['DEF-spine.004'];K.handB=[I['DEF-hand.R'],I['DEF-hand.L']];K.wr0=[0,1].map(k=>{const F=k?I['DEF-forearm.L']:I['DEF-forearm.R'],H=k?I['DEF-hand.L']:I['DEF-hand.R'];return Bq[F].clone().invert().multiply(Bq[H]).invert();});K.armB=[[I['DEF-upper_arm.R'],I['DEF-forearm.R']],[I['DEF-upper_arm.L'],I['DEF-forearm.L']]];K.fist=[new THREE.Vector3(.47,-7.4,0),new THREE.Vector3(-.47,-7.4,0)];K.arm0=p.arms.map(a=>a.position.clone());
  holder.scale.setScalar(HK.S);holder.position.y=-((p.lift&&p.lift.userData.y0)||4.6);p.body.add(holder);p.kit=K;p.kitOn=true;HK.live.add(p);
  hkGear(p,{});}catch(e){console.warn('hkAttach',e);p.kit=null;p.kitOn=false;}}
 function hkPart(p,name,uv){const K=p.kit,key=name+(uv?'@':'');let m=K.parts[key];if(m!==undefined)return m;const g=hkGeo(name,uv);if(!g)return K.parts[key]=null;
@@ -2239,8 +2239,9 @@ function hkTick(h,dt){const K=h.kit;if(!K||!h.kitOn)return;const B=K.bones,WQ=K.
   if(wU>0){h.body.rotation.x*=(1-wU);if(h.twist)h.body.rotation.y-=h.twist*wU;}}
  const s=HK.S,hy=K.holder.position.y;for(let k=0;k<2;k++){const si=K.sock[k];if(si===undefined)continue;const a=h.arms[k],f=a.userData.fore;
   _hv.copy(WP[si]).multiplyScalar(s);_hv.y+=hy;_hv2.copy(K.fist[k]).applyQuaternion(f.quaternion).add(f.position).applyQuaternion(a.quaternion);a.position.copy(_hv).sub(_hv2);}
- if(K.cls==='arc'&&h.off&&h.off.parent===h.body&&K.back!==undefined){const bs=K.back;if(!HK.qvQ)HK.qvQ=new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,0,1),Math.PI);
-  h.off.quaternion.copy(WQ[bs]).multiply(HK.qvQ);h.off.position.copy(WP[bs]).multiplyScalar(s);h.off.position.y+=hy;h.off.position.add(_hv3.set(0,HK.qvD,1.6).applyQuaternion(WQ[bs]));}
+ // quiver: upright along the spine on the back, top leaning towards the right shoulder
+ if(K.cls==='arc'&&h.off&&h.off.parent===h.body&&K.chest!==undefined&&K.neck!==undefined){_hv4.copy(WP[K.neck]).sub(WP[K.chest]).normalize();_hv4.x-=.38;_hv4.normalize();
+  h.off.quaternion.setFromUnitVectors(_hv3.set(0,1,0),_hv4);h.off.position.copy(WP[K.chest]).multiplyScalar(s);h.off.position.y+=hy-3;h.off.position.x-=.8;h.off.position.z-=HK.qvD;}
  // weapons sit in the kit's weapon sockets (blade along the socket +Y), the old swing offsets are dropped
  if(wArm>.5){for(const w of[h.weapon,h.off]){const u=w&&w.userData;if(!u||!u.q0||!w.parent)continue;const k=w.parent===h.arms[1].userData.fore?1:w.parent===h.arms[0].userData.fore?0:-1;if(k<0)continue;
    const a=h.arms[k],f=a.userData.fore;_hq5.copy(a.quaternion).multiply(f.quaternion);
@@ -2291,7 +2292,7 @@ function hkTickAll(){hkaInit();const now=performance.now(),dtG=_hkLT?Math.min(.1
   if(HKA.ok){const LS=h._ls||(h._ls={ph:Math.random(),v:0,fw:0,pu:0,x:h.root.position.x,z:h.root.position.z,fightClip:'Idle_Loop'});const rp=h.root.position;
    const d=Math.hypot(rp.x-LS.x,rp.z-LS.z);LS.x=rp.x;LS.z=rp.z;const vi=dt>0&&d<200?d/dt:0;LS.v+=(vi-LS.v)*Math.min(1,dt*10);
    const me=h===h0;LS.on=!(me&&P&&P.riding);LS.dead=me&&P&&P.dead;
-   const cls=h.kit?h.kit.cls:'swd';LS.fightClip=cls==='sha'?'Spell_Simple_Idle_Loop':cls==='arc'?'ARC_Idle':'Sword_Idle';const ar=cls==='arc'&&HKA.c.ARC_Run;LS.wk=ar?'ARC_Walk':'Walk_Loop';LS.jg=ar?'ARC_Run':'Jog_Fwd_Loop';LS.wkR=ar?44:21;LS.jgR=ar?88:117;
+   const cls=h.kit?h.kit.cls:'swd';LS.fightClip=cls==='sha'?'Spell_Simple_Idle_Loop':cls==='arc'?'ARC_Idle':'Sword_Idle';const ar=false;LS.wk=ar?'ARC_Walk':'Walk_Loop';LS.jg=ar?'ARC_Run':'Jog_Fwd_Loop';LS.wkR=ar?44:21;LS.jgR=ar?88:117;
    const fight=me&&P?((P.target&&!P.target.dead&&dist(P,P.target)<420)||(P.atkA&&P.atkA.t<3)||(typeof lastHit!=='undefined'&&T-lastHit<4)):(nowS-(h._atkT||-99)<4);
    LS.fw+=((fight?1:0)-LS.fw)*Math.min(1,dt*4);
    const pu=me&&P?(P.skA&&!hkActive(h)):(nowS<(h._procT||0));LS.pu+=((pu?1:0)-LS.pu)*Math.min(1,dt*(pu?14:6));}
@@ -6277,7 +6278,7 @@ window.claude?.hot?.snapshot?.(()=>({state:running?serialize():null}));
 window.claude?.hot?.ready?window.claude.hot.ready(boot):boot(window.claude?.hot?.data??{});
 </script>
 <div id="pkLoad" style="position:fixed;left:0;right:0;bottom:calc(env(safe-area-inset-bottom,0px) + 18px);text-align:center;z-index:9999;font:600 14px system-ui,sans-serif;color:#f3e6c8;text-shadow:0 1px 3px #000;pointer-events:none">Kraunama… <span id="pkPct">0</span>%</div>
-<script>window.__PK={};(function(){const L={"vegData": "d/veg.bin?v=4db597fd00", "vkPk": "d/vk.bin?v=4db597fd00", "heroAn": "d/anim.bin?v=4db597fd00", "heroPk": "d/hero.bin?v=4db597fd00", "townPk": "d/town.bin?v=4db597fd00", "dragonPk": "d/dragon.bin?v=4db597fd00", "dgkPk": "d/dgk.bin?v=4db597fd00"},sizes={"vegData": 1878408, "vkPk": 1088548, "heroAn": 662544, "heroPk": 3287460, "townPk": 392700, "dragonPk": 269688, "dgkPk": 1214946};let tot=0;const cur={};for(const k in sizes)tot+=sizes[k];
+<script>window.__PK={};(function(){const L={"vegData": "d/veg.bin?v=91253263cf", "vkPk": "d/vk.bin?v=91253263cf", "heroAn": "d/anim.bin?v=91253263cf", "heroPk": "d/hero.bin?v=91253263cf", "townPk": "d/town.bin?v=91253263cf", "dragonPk": "d/dragon.bin?v=91253263cf", "dgkPk": "d/dgk.bin?v=91253263cf"},sizes={"vegData": 1878408, "vkPk": 1088548, "heroAn": 662544, "heroPk": 3287460, "townPk": 392700, "dragonPk": 269688, "dgkPk": 1214946};let tot=0;const cur={};for(const k in sizes)tot+=sizes[k];
 const pct=()=>{const e=document.getElementById('pkPct');if(e&&tot)e.textContent=Math.min(99,Math.round(Object.values(cur).reduce((a,b)=>a+b,0)/tot*100));};
 const get=(id,u)=>fetch(u).then(r=>{if(!r.ok)throw new Error(u+' '+r.status);if(!r.body||!r.body.getReader)return r.arrayBuffer().then(b=>{cur[id]=b.byteLength;pct();return b;});
  const rd=r.body.getReader(),parts=[];let n=0;const pump=()=>rd.read().then(({done,value})=>{if(done){const o=new Uint8Array(n);let p=0;for(const c of parts){o.set(c,p);p+=c.length;}return o.buffer;}parts.push(value);n+=value.length;cur[id]=n;pct();return pump();});return pump();});
