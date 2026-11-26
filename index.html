@@ -1310,7 +1310,7 @@ function buildVK1(t){const L=VK1.L;if(!L)return;const el=document.getElementById
  const geo=k=>{const m=VK_META[k],[o1,o2,o3]=m.o,q=new Int16Array(BUF,o1,m.nv*3),u=new Uint16Array(BUF,o2,m.nv*2),I=m.nv<65536?new Uint16Array(BUF,o3,m.ni):new Uint32Array(BUF,o3,m.ni);
   const P=new Float32Array(m.nv*3),U=new Float32Array(m.nv*2);for(let i=0;i<P.length;i++)P[i]=q[i]/5000;for(let i=0;i<U.length;i++)U[i]=u[i]/65535;
   let g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(P,3));g.setAttribute('uv',new THREE.BufferAttribute(U,2));g.setIndex(new THREE.BufferAttribute(I.slice(),1));g=g.toNonIndexed();g.computeVertexNormals();return g;};
- const mt=k=>{const im=new Image(),tx=new THREE.Texture(im);im.onload=()=>{tx.needsUpdate=true;};im.src=VK_META[k].tex+'?v=f83a3fe0d0';tx.anisotropy=4;return new THREE.MeshLambertMaterial({map:tx});};
+ const mt=k=>{const im=new Image(),tx=new THREE.Texture(im);im.onload=()=>{tx.needsUpdate=true;};im.src=VK_META[k].tex+'?v=89a9fe3a52';tx.anisotropy=4;return new THREE.MeshLambertMaterial({map:tx});};
  const by={};for(const p of L.list)(by[p.k]=by[p.k]||[]).push(p);
  const m4=new THREE.Matrix4(),q=new THREE.Quaternion(),e=new THREE.Euler(),v=new THREE.Vector3(),sc=new THREE.Vector3();
  for(const k in by){const arr=by[k],im=new THREE.InstancedMesh(geo(k),mt(k),arr.length);arr.forEach((p,i)=>{const x=t.x+p.x,z=t.y+p.z;q.setFromEuler(e.set(0,p.r,0));m4.compose(v.set(x,hAt(x,z),z),q,sc.set(p.s,p.s,p.s));im.setMatrixAt(i,m4);});
@@ -2099,7 +2099,7 @@ const wcol=()=>ws.type===3?RAINBOW[(h.wpI=((h.wpI||0)+1)%6)]:ws.type===2?(Math.r
 }
 const FHAIR={swd:'#e8c46a',war:'#a8402a',arc:'#6a3a1a',sha:'#e4e4f0',dag:'#1e1420'};
 /* ---------- modular skinned hero kit (male heroes) ---------- */
-const HK={ok:null,geo:{},live:new Set(),S:20,twoD:15,noTwo:1,
+const HK={ok:null,geo:{},live:new Set(),S:20,twoD:15,noTwo:1,staffA:Math.PI/2,orbUp:7,
  VAR:{swd:'001',arc:'002',war:'003',dag:'004',sha:'005'},SETS:[null,'B','I','G','DS','M'],
  TONE:{swd:'Light',arc:'Light',war:'Medium',dag:'Medium',sha:'Dark'},
  FACE:{swd:['Hair.006','Beard.006','Eyebrows.001'],war:['Hair.009','Beard.009','Eyebrows.004'],arc:['Hair.008','Mustache.009','Eyebrows.003'],dag:['Hair.007','Mustache.008','Eyebrows.002'],sha:['Hair.010','Beard.010','Eyebrows.005']},
@@ -2216,7 +2216,8 @@ function hkTick(h,dt){const K=h.kit;if(!K||!h.kitOn)return;const B=K.bones,WQ=K.
  // weapons sit in the kit's weapon sockets (blade along the socket +Y), the old swing offsets are dropped
  if(wArm>.5){for(const w of[h.weapon,h.off]){const u=w&&w.userData;if(!u||!u.q0||!w.parent)continue;const k=w.parent===h.arms[1].userData.fore?1:w.parent===h.arms[0].userData.fore?0:-1;if(k<0)continue;
    const a=h.arms[k],f=a.userData.fore;_hq5.copy(a.quaternion).multiply(f.quaternion);
-   if(u.gp0){w.quaternion.copy(_hq5).invert().multiply(WQ[K.sock[k]]);if(K.cls==='arc'&&w===h.weapon)w.quaternion.multiply(HK.bowR||(HK.bowR=new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,1,0),Math.PI)));w.position.copy(u.fist).sub(_hv3.copy(u.gp0).applyQuaternion(w.quaternion));}
+   if(u.gp0){w.quaternion.copy(_hq5).invert().multiply(WQ[K.sock[k]]);if(K.cls==='arc'&&w===h.weapon)w.quaternion.multiply(HK.bowR||(HK.bowR=new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,1,0),Math.PI)));else if(K.cls==='sha'&&w===h.weapon)w.quaternion.multiply(HK.staffR||(HK.staffR=new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0,1,0),new THREE.Vector3(-.15,.38,.91).normalize())));w.position.copy(u.fist).sub(_hv3.copy(u.gp0).applyQuaternion(w.quaternion));}
+   else if(K.cls==='sha'&&w===h.off&&K.sock[1]!==undefined){w.quaternion.copy(u.q0);_hv3.set(0,0,HK.orbUp).applyQuaternion(WQ[K.sock[1]]).applyQuaternion(_hq6.copy(_hq5).invert());w.position.copy(K.fist[1]).add(_hv3);}
    else{w.quaternion.copy(u.q0);if(u.p0)w.position.copy(u.p0);}}}}
 // demon hunter: the left hand grips the scythe shaft above the right hand (two-bone IK on the left arm)
 const _th={v1:new THREE.Vector3(),v2:new THREE.Vector3(),v3:new THREE.Vector3(),v4:new THREE.Vector3(),v5:new THREE.Vector3(),v6:new THREE.Vector3(),q1:new THREE.Quaternion(),q2:new THREE.Quaternion(),q3:new THREE.Quaternion(),q4:new THREE.Quaternion()};
@@ -2234,7 +2235,7 @@ function hkTwoHand(h,K,B,WQ,WP,par){const U=K.armB[1][0],F=K.armB[1][1],Hn=K.han
 let _hkLT=0;
 // far / off-screen characters animate less often (each keeps its own clock so motion speed stays right)
 const _lodS=new THREE.Sphere(new THREE.Vector3(),45);
-function hkLod(h,now,dtG,me){if(me||!P){h._lt=now;return dtG;}const rp=h.root.position,d=Math.hypot(rp.x-P.x,rp.z-P.y);let iv=d<520?0:d<900?.034:.07;
+function hkLod(h,now,dtG,me){if(me||!P||h.root.parent!==scene){h._lt=now;return dtG;}const rp=h.root.position,d=Math.hypot(rp.x-P.x,rp.z-P.y);let iv=d<520?0:d<900?.034:.07;
  try{_lodS.center.set(rp.x,rp.y+20,rp.z);if(!_fr.intersectsSphere(_lodS))iv=.6;}catch(e){}if(GFX!=='high')iv=Math.max(iv,d<320?0:.07);
  const last=h._lt||0;if(last&&now-last<iv*1000)return -1;h._lt=now;return last?Math.min(.1,(now-last)/1000):dtG;}
 function hkTickAll(){hkaInit();const now=performance.now(),dtG=_hkLT?Math.min(.1,(now-_hkLT)/1000):0;_hkLT=now;
@@ -6235,7 +6236,7 @@ window.claude?.hot?.snapshot?.(()=>({state:running?serialize():null}));
 window.claude?.hot?.ready?window.claude.hot.ready(boot):boot(window.claude?.hot?.data??{});
 </script>
 <div id="pkLoad" style="position:fixed;left:0;right:0;bottom:calc(env(safe-area-inset-bottom,0px) + 18px);text-align:center;z-index:9999;font:600 14px system-ui,sans-serif;color:#f3e6c8;text-shadow:0 1px 3px #000;pointer-events:none">Kraunama… <span id="pkPct">0</span>%</div>
-<script>window.__PK={};(function(){const L={"vegData": "d/veg.bin?v=f83a3fe0d0", "vkPk": "d/vk.bin?v=f83a3fe0d0", "heroAn": "d/anim.bin?v=f83a3fe0d0", "heroPk": "d/hero.bin?v=f83a3fe0d0", "townPk": "d/town.bin?v=f83a3fe0d0", "dragonPk": "d/dragon.bin?v=f83a3fe0d0", "dgkPk": "d/dgk.bin?v=f83a3fe0d0"},sizes={"vegData": 1878408, "vkPk": 1088548, "heroAn": 662544, "heroPk": 3287460, "townPk": 392700, "dragonPk": 269688, "dgkPk": 1214946};let tot=0;const cur={};for(const k in sizes)tot+=sizes[k];
+<script>window.__PK={};(function(){const L={"vegData": "d/veg.bin?v=89a9fe3a52", "vkPk": "d/vk.bin?v=89a9fe3a52", "heroAn": "d/anim.bin?v=89a9fe3a52", "heroPk": "d/hero.bin?v=89a9fe3a52", "townPk": "d/town.bin?v=89a9fe3a52", "dragonPk": "d/dragon.bin?v=89a9fe3a52", "dgkPk": "d/dgk.bin?v=89a9fe3a52"},sizes={"vegData": 1878408, "vkPk": 1088548, "heroAn": 662544, "heroPk": 3287460, "townPk": 392700, "dragonPk": 269688, "dgkPk": 1214946};let tot=0;const cur={};for(const k in sizes)tot+=sizes[k];
 const pct=()=>{const e=document.getElementById('pkPct');if(e&&tot)e.textContent=Math.min(99,Math.round(Object.values(cur).reduce((a,b)=>a+b,0)/tot*100));};
 const get=(id,u)=>fetch(u).then(r=>{if(!r.ok)throw new Error(u+' '+r.status);if(!r.body||!r.body.getReader)return r.arrayBuffer().then(b=>{cur[id]=b.byteLength;pct();return b;});
  const rd=r.body.getReader(),parts=[];let n=0;const pump=()=>rd.read().then(({done,value})=>{if(done){const o=new Uint8Array(n);let p=0;for(const c of parts){o.set(c,p);p+=c.length;}return o.buffer;}parts.push(value);n+=value.length;cur[id]=n;pct();return pump();});return pump();});
