@@ -1310,7 +1310,7 @@ function buildVK1(t){const L=VK1.L;if(!L)return;const el=document.getElementById
  const geo=k=>{const m=VK_META[k],[o1,o2,o3]=m.o,q=new Int16Array(BUF,o1,m.nv*3),u=new Uint16Array(BUF,o2,m.nv*2),I=m.nv<65536?new Uint16Array(BUF,o3,m.ni):new Uint32Array(BUF,o3,m.ni);
   const P=new Float32Array(m.nv*3),U=new Float32Array(m.nv*2);for(let i=0;i<P.length;i++)P[i]=q[i]/5000;for(let i=0;i<U.length;i++)U[i]=u[i]/65535;
   let g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(P,3));g.setAttribute('uv',new THREE.BufferAttribute(U,2));g.setIndex(new THREE.BufferAttribute(I.slice(),1));g=g.toNonIndexed();g.computeVertexNormals();return g;};
- const mt=k=>{const im=new Image(),tx=new THREE.Texture(im);im.onload=()=>{tx.needsUpdate=true;};im.src=VK_META[k].tex+'?v=89a9fe3a52';tx.anisotropy=4;return new THREE.MeshLambertMaterial({map:tx});};
+ const mt=k=>{const im=new Image(),tx=new THREE.Texture(im);im.onload=()=>{tx.needsUpdate=true;};im.src=VK_META[k].tex+'?v=3d5ab7ea4d';tx.anisotropy=4;return new THREE.MeshLambertMaterial({map:tx});};
  const by={};for(const p of L.list)(by[p.k]=by[p.k]||[]).push(p);
  const m4=new THREE.Matrix4(),q=new THREE.Quaternion(),e=new THREE.Euler(),v=new THREE.Vector3(),sc=new THREE.Vector3();
  for(const k in by){const arr=by[k],im=new THREE.InstancedMesh(geo(k),mt(k),arr.length);arr.forEach((p,i)=>{const x=t.x+p.x,z=t.y+p.z;q.setFromEuler(e.set(0,p.r,0));m4.compose(v.set(x,hAt(x,z),z),q,sc.set(p.s,p.s,p.s));im.setMatrixAt(i,m4);});
@@ -1639,7 +1639,22 @@ function roadList(){if(roadList.c)return roadList.c;const [a,b,c]=TOWNS,gt=(t,an
   bez(gt(b,Math.PI/2),[23200*WS,16600*WS],.05),
   bez(gt(c,Math.PI*1.5),[TEMPLE.x,TEMPLE.y+380],.1),bez(gt(b,0),[TEMPLE2.x,TEMPLE2.y+380],.12),
   bez(gt(a,Math.PI*1.5),[8200*WS,7900*WS],.06), bez(gt(a,Math.PI),[3900*WS,8200*WS],.1), bez(gt(b,Math.PI*1.5),[27000*WS,2900*WS],-.1), bez(gt(c,0),[45000*WS,12600*WS],.08)];
- roadList.c=r;return r;}
+ roadList.c=meanderRoads(r);return roadList.c;}
+// winding roads: each straight-ish bezier becomes a polyline that wanders left and right (straight near towns/bridges, never into water),
+// then goes back to a chain of small smooth bezier pieces so painting and road checks keep working
+function meanderRoads(list){const out=[],R=mulberry(4242),bz=(r,t)=>{const u=1-t;return[u*u*u*r[0]+3*u*u*t*r[2]+3*u*t*t*r[4]+t*t*t*r[6],u*u*u*r[1]+3*u*u*t*r[3]+3*u*t*t*r[5]+t*t*t*r[7]];};
+ list.forEach((r,ri)=>{let L=0,pv=bz(r,0);for(let i=1;i<=40;i++){const q=bz(r,i/40);L+=Math.hypot(q[0]-pv[0],q[1]-pv[1]);pv=q;}
+  const n=Math.max(6,Math.ceil(L/90)),amp=(ri===3?.25:.6+R()*.75)*Math.min(1,L/2500),ph=[R()*6.28,R()*6.28,R()*6.28],w1=2600+R()*1800,w2=1000+R()*500,w3=520+R()*200,sg=R()<.5?-1:1;
+  const pts=[];for(let i=0;i<=n;i++){const t=i/n,p=bz(r,t),q=bz(r,Math.min(1,t+.002)),p0=bz(r,Math.max(0,t-.002)),tx=q[0]-p0[0],ty=q[1]-p0[1],tl=Math.hypot(tx,ty)||1,nx=-ty/tl,ny=tx/tl,sd=t*L;
+   const tap=Math.min(1,sd/700,(L-sd)/700),tp=tap<=0?0:tap*tap*(3-2*tap);
+   let off=sg*amp*tp*(520*Math.sin(sd/w1*6.283+ph[0])+170*Math.sin(sd/w2*6.283+ph[1])+40*Math.sin(sd/w3*6.283+ph[2]));
+   for(let k=0;k<4&&Math.abs(off)>4&&landF(p[0]+nx*off,p[1]+ny*off)<.1;k++)off*=.5;if(landF(p[0]+nx*off,p[1]+ny*off)<.1&&landF(p[0],p[1])>=.1)off=0;
+   pts.push([p[0]+nx*off,p[1]+ny*off]);}
+  // light smoothing so wiggles stay soft
+  for(let it=0;it<2;it++)for(let i=1;i<pts.length-1;i++){pts[i]=[(pts[i-1][0]+pts[i][0]*2+pts[i+1][0])/4,(pts[i-1][1]+pts[i][1]*2+pts[i+1][1])/4];}
+  for(let i=0;i<pts.length-1;i++){const a=pts[Math.max(0,i-1)],b=pts[i],c=pts[i+1],d=pts[Math.min(pts.length-1,i+2)];
+   out.push([b[0],b[1],b[0]+(c[0]-a[0])/6,b[1]+(c[1]-a[1])/6,c[0]-(d[0]-b[0])/6,c[1]-(d[1]-b[1])/6,c[0],c[1]]);}});
+ return out;}
 let punch=0,slowT=0;function addPunch(a,sl){if(NO_MOTION||GFX!=='high')return;punch=Math.max(punch,a);if(sl)slowT=Math.max(slowT,sl);}
 let hemi=null,motes=null,heroLight=null,waterM=null,seaM=null,detailTex=null;
 const DAY_LEN=420;let DAYT=.3,dayAcc=0,lastNight=false;const lampPts=[],lamps=[],SUNOFF={x:-300,y:420,z:120};
@@ -6236,7 +6251,7 @@ window.claude?.hot?.snapshot?.(()=>({state:running?serialize():null}));
 window.claude?.hot?.ready?window.claude.hot.ready(boot):boot(window.claude?.hot?.data??{});
 </script>
 <div id="pkLoad" style="position:fixed;left:0;right:0;bottom:calc(env(safe-area-inset-bottom,0px) + 18px);text-align:center;z-index:9999;font:600 14px system-ui,sans-serif;color:#f3e6c8;text-shadow:0 1px 3px #000;pointer-events:none">Kraunama… <span id="pkPct">0</span>%</div>
-<script>window.__PK={};(function(){const L={"vegData": "d/veg.bin?v=89a9fe3a52", "vkPk": "d/vk.bin?v=89a9fe3a52", "heroAn": "d/anim.bin?v=89a9fe3a52", "heroPk": "d/hero.bin?v=89a9fe3a52", "townPk": "d/town.bin?v=89a9fe3a52", "dragonPk": "d/dragon.bin?v=89a9fe3a52", "dgkPk": "d/dgk.bin?v=89a9fe3a52"},sizes={"vegData": 1878408, "vkPk": 1088548, "heroAn": 662544, "heroPk": 3287460, "townPk": 392700, "dragonPk": 269688, "dgkPk": 1214946};let tot=0;const cur={};for(const k in sizes)tot+=sizes[k];
+<script>window.__PK={};(function(){const L={"vegData": "d/veg.bin?v=3d5ab7ea4d", "vkPk": "d/vk.bin?v=3d5ab7ea4d", "heroAn": "d/anim.bin?v=3d5ab7ea4d", "heroPk": "d/hero.bin?v=3d5ab7ea4d", "townPk": "d/town.bin?v=3d5ab7ea4d", "dragonPk": "d/dragon.bin?v=3d5ab7ea4d", "dgkPk": "d/dgk.bin?v=3d5ab7ea4d"},sizes={"vegData": 1878408, "vkPk": 1088548, "heroAn": 662544, "heroPk": 3287460, "townPk": 392700, "dragonPk": 269688, "dgkPk": 1214946};let tot=0;const cur={};for(const k in sizes)tot+=sizes[k];
 const pct=()=>{const e=document.getElementById('pkPct');if(e&&tot)e.textContent=Math.min(99,Math.round(Object.values(cur).reduce((a,b)=>a+b,0)/tot*100));};
 const get=(id,u)=>fetch(u).then(r=>{if(!r.ok)throw new Error(u+' '+r.status);if(!r.body||!r.body.getReader)return r.arrayBuffer().then(b=>{cur[id]=b.byteLength;pct();return b;});
  const rd=r.body.getReader(),parts=[];let n=0;const pump=()=>rd.read().then(({done,value})=>{if(done){const o=new Uint8Array(n);let p=0;for(const c of parts){o.set(c,p);p+=c.length;}return o.buffer;}parts.push(value);n+=value.length;cur[id]=n;pct();return pump();});return pump();});
