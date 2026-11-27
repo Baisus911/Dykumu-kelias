@@ -305,7 +305,7 @@ button:focus-visible{outline:2px solid var(--brass);outline-offset:2px}
 .eqgrid{display:grid;grid-template-columns:76px minmax(0,1fr) 76px;gap:8px 10px;align-items:start}
 .eqgrid .col{display:flex;flex-direction:column;gap:6px}
 .pv{position:relative;align-self:stretch;border-radius:14px;background:radial-gradient(120% 80% at 50% 35%,#5a3e22,#1a120c 75%);border:1px solid var(--brass-dim);overflow:hidden;min-height:270px}
-.pv canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none;display:block}
+.pv canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none;display:block}.dprev{position:relative;height:190px;margin:2px 0 6px;border-radius:10px;background:radial-gradient(ellipse at 50% 70%,rgba(255,200,120,.16),rgba(0,0,0,.25));overflow:hidden}.dprev canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none;display:block}.dprev small{position:absolute;left:8px;top:6px;font-size:11px;opacity:.7;pointer-events:none}
 .pv small{position:absolute;bottom:6px;left:0;right:0;text-align:center;font-size:11px;color:var(--ink-dim);pointer-events:none}
 .pvst{display:flex;flex-wrap:wrap;gap:4px;justify-content:center;align-content:center;align-self:center}
 .pvst .chip{font-size:11px}
@@ -1310,7 +1310,7 @@ function buildVK1(t){const L=VK1.L;if(!L)return;const el=document.getElementById
  const geo=k=>{const m=VK_META[k],[o1,o2,o3]=m.o,q=new Int16Array(BUF,o1,m.nv*3),u=new Uint16Array(BUF,o2,m.nv*2),I=m.nv<65536?new Uint16Array(BUF,o3,m.ni):new Uint32Array(BUF,o3,m.ni);
   const P=new Float32Array(m.nv*3),U=new Float32Array(m.nv*2);for(let i=0;i<P.length;i++)P[i]=q[i]/5000;for(let i=0;i<U.length;i++)U[i]=u[i]/65535;
   let g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(P,3));g.setAttribute('uv',new THREE.BufferAttribute(U,2));g.setIndex(new THREE.BufferAttribute(I.slice(),1));g=g.toNonIndexed();g.computeVertexNormals();return g;};
- const mt=k=>{const im=new Image(),tx=new THREE.Texture(im);im.onload=()=>{tx.needsUpdate=true;};im.src=VK_META[k].tex+'?v=dcffdffcb3';tx.anisotropy=4;return new THREE.MeshLambertMaterial({map:tx});};
+ const mt=k=>{const im=new Image(),tx=new THREE.Texture(im);im.onload=()=>{tx.needsUpdate=true;};im.src=VK_META[k].tex+'?v=b9266bb349';tx.anisotropy=4;return new THREE.MeshLambertMaterial({map:tx});};
  const by={};for(const p of L.list)(by[p.k]=by[p.k]||[]).push(p);
  const m4=new THREE.Matrix4(),q=new THREE.Quaternion(),e=new THREE.Euler(),v=new THREE.Vector3(),sc=new THREE.Vector3();
  for(const k in by){const arr=by[k],im=new THREE.InstancedMesh(geo(k),mt(k),arr.length);arr.forEach((p,i)=>{const x=t.x+p.x,z=t.y+p.z;q.setFromEuler(e.set(0,p.r,0));m4.compose(v.set(x,hAt(x,z),z),q,sc.set(p.s,p.s,p.s));im.setMatrixAt(i,m4);});
@@ -5442,10 +5442,12 @@ function tile(it,o){o=o||{};const dim=it.lvl>P.lv||!clsOk(it)||o.dim;
 let detailCtx=null;
 function openDetail(d){detailCtx=d;const el=$('#dsh');el.className='dsh'+(d.rar?' r'+d.rar:'');
  el.innerHTML=`<div class="dtop"><img src="${d.pic}" alt=""><div><h3 class="${d.rar?'n'+d.rar:''}">${d.title}</h3><div class="dtags">${(d.tags||[]).join('')}</div></div><button class="x" data-close aria-label="Uždaryti">×</button></div>
- ${d.stats?`<div class="dstats">${d.stats}</div>`:''}${d.info?`<p class="dinfo">${d.info}</p>`:''}
+ ${d.tryOn?'<div class="dprev" id="dprev"><small>Taip atrodytų ant jūsų · pasukite pirštu</small></div>':''}${d.stats?`<div class="dstats">${d.stats}</div>`:''}${d.info?`<p class="dinfo">${d.info}</p>`:''}
  <div class="acts2">${d.actions.map((a,i)=>`<button class="act ${a.cls||''}" data-a="${i}" ${a.disabled?'disabled':''}>${svg(a.icon)}<span>${a.label}${a.sub?` <small>${a.sub}</small>`:''}</span></button>`).join('')}</div>`;
- $('#detail').hidden=false;}
-function closeDetail(){$('#detail').hidden=true;detailCtx=null;}
+ $('#detail').hidden=false;if(pv.tryOn&&!d.tryOn)tryOnEnd();if(d.tryOn)tryOnStart(d.tryOn);}
+function tryOnStart(it){if(!ensurePreview())return;pv.tryOn=it;const e=Object.assign({},P.eq);if(it.slot==='costume')e.costume=it;else if(it.slot==='cape')e.cape=it;applyGear(pv.hero,e);const host=$('#dprev');if(host)host.prepend(pv.canvas);pv.w=0;}
+function tryOnEnd(){if(!pv.tryOn)return;pv.tryOn=null;if(pv.hero)applyGear(pv.hero);const host=$('#pvHost');if(host)host.prepend(pv.canvas);pv.w=0;}
+function closeDetail(){$('#detail').hidden=true;detailCtx=null;tryOnEnd();}
 $('#detail').addEventListener('click',e=>{if(e.target.id==='detail'||e.target.closest('[data-close]')){closeDetail();return;}const b=e.target.closest('[data-a]');if(!b||b.disabled||!detailCtx)return;const a=detailCtx.actions[+b.dataset.a];a.fn();});
 function itemDetail(it,actions,extra){
  const st=itemStats(it),eqd=isEquipped(it),ts=targetSlot(it),curIt=!eqd&&canEquip(it)?P.eq[ts]:null,cur=curIt?itemStats(curIt):(!eqd&&clsOk(it)?{}:null);
@@ -5462,7 +5464,7 @@ function itemDetail(it,actions,extra){
  else if(it.wing)info=(info?info+' ':'')+WINGS[it.wing].d+' Dėvima vietoj apsiausto.';
  else if(isExtra(it))info=(info?info+' ':'')+'Mitinis daiktas: jo neįmanoma pagerinti kalvėje ir jis retai randamas.';
  if(it.slot==='mount')info=(info?info+' ':'')+(it.tier>=4?'Smėlio liūtas suteikia jojikui galios ir šiek tiek greičio.':'Raitas gyvūnas didina judėjimo greitį.');
- openDetail({pic:itemPic(it),title:itemName(it),rar:it.rar,tags,stats:rows,info:info+(extra||''),actions});
+ openDetail({pic:itemPic(it),title:itemName(it),rar:it.rar,tags,stats:rows,info:info+(extra||''),actions,tryOn:(it.slot==='costume'||it.slot==='cape')&&!isEquipped(it)?it:null});
 }
 function equip(id){const i=P.bag.findIndex(x=>x.id===id);if(i<0)return;const it=P.bag[i];if(!canEquip(it))return;const sl=targetSlot(it);const old=P.eq[sl];P.eq[sl]=it;P.bag.splice(i,1);if(old)P.bag.push(old);clampVitals();refreshHeroGear();save();toast('Užsidėta: '+itemName(it));}
 function unequip(slot){if(!P.eq[slot]||(P.bag.length>=BAG_CAP&&!EX_UI.includes(slot)))return;P.bag.push(P.eq[slot]);P.eq[slot]=null;clampVitals();refreshHeroGear();save();}
@@ -6554,7 +6556,7 @@ const ADR={hi:1.75,acc:0,n:0};
 function adrTick(raw){if(!running||paused||document.hidden||raw>.25)return;ADR.acc+=raw;ADR.n++;if(ADR.acc<2.5)return;const fps=ADR.n/ADR.acc;ADR.acc=0;ADR.n=0;
  const o=ADR.hi;if(fps<40)ADR.hi=Math.max(1.3,ADR.hi-.15);else if(fps>55)ADR.hi=Math.min(1.75,ADR.hi+.1);if(Math.abs(o-ADR.hi)>.01&&renderer&&GFX==='high')resize();}
 function frame(now){if(GFX!=='high'&&now-lastT<30){requestAnimationFrame(frame);return;}adrTick((now-lastT)/1000);let dt=Math.min(.05,(now-lastT)/1000);lastT=now;punch=Math.max(0,punch-dt*2.6);if(slowT>0){slowT-=dt;dt*=.35;}
- if(running&&P){if(!paused)update(dt);else T+=dt;syncScene(dt);hkTickAll();renderer.render(scene,camera);drawOverlay();hud();if(!$('#sheet').hidden&&sheetTab==='items')renderPreview(dt);if(!$('#mapScr').hidden)drawBigMap();miniT-=dt;if(miniT<=0){miniT=.25;drawMini();}}
+ if(running&&P){if(!paused)update(dt);else T+=dt;syncScene(dt);hkTickAll();renderer.render(scene,camera);drawOverlay();hud();if((!$('#sheet').hidden&&sheetTab==='items')||(pv.tryOn&&!$('#detail').hidden))renderPreview(dt);if(!$('#mapScr').hidden)drawBigMap();miniT-=dt;if(miniT<=0){miniT=.25;drawMini();}}
  requestAnimationFrame(frame);}
 function boot(data){
  if(typeof THREE==='undefined'){$('#loading').textContent='Nepavyko įkelti 3D variklio. Patikrinkite ryšį ir atnaujinkite puslapį.';return;}
@@ -6573,7 +6575,7 @@ window.claude?.hot?.snapshot?.(()=>({state:running?serialize():null}));
 window.claude?.hot?.ready?window.claude.hot.ready(boot):boot(window.claude?.hot?.data??{});
 </script>
 <div id="pkLoad" style="position:fixed;left:0;right:0;bottom:calc(env(safe-area-inset-bottom,0px) + 18px);text-align:center;z-index:9999;font:600 14px system-ui,sans-serif;color:#f3e6c8;text-shadow:0 1px 3px #000;pointer-events:none">Kraunama… <span id="pkPct">0</span>%</div>
-<script>window.__PK={};(function(){const L={"vegData": "d/veg.bin?v=dcffdffcb3", "vkPk": "d/vk.bin?v=dcffdffcb3", "heroAn": "d/anim.bin?v=dcffdffcb3", "heroPk": "d/hero.bin?v=dcffdffcb3", "townPk": "d/town.bin?v=dcffdffcb3", "dragonPk": "d/dragon.bin?v=dcffdffcb3", "dgkPk": "d/dgk.bin?v=dcffdffcb3", "zkPk": "d/zk.bin?v=dcffdffcb3"},sizes={"vegData": 1878408, "vkPk": 1088548, "heroAn": 662544, "heroPk": 3287460, "townPk": 392700, "dragonPk": 269688, "dgkPk": 1214946, "zkPk": 2064640};let tot=0;const cur={};for(const k in sizes)tot+=sizes[k];
+<script>window.__PK={};(function(){const L={"vegData": "d/veg.bin?v=b9266bb349", "vkPk": "d/vk.bin?v=b9266bb349", "heroAn": "d/anim.bin?v=b9266bb349", "heroPk": "d/hero.bin?v=b9266bb349", "townPk": "d/town.bin?v=b9266bb349", "dragonPk": "d/dragon.bin?v=b9266bb349", "dgkPk": "d/dgk.bin?v=b9266bb349", "zkPk": "d/zk.bin?v=b9266bb349"},sizes={"vegData": 1878408, "vkPk": 1088548, "heroAn": 662544, "heroPk": 3287460, "townPk": 392700, "dragonPk": 269688, "dgkPk": 1214946, "zkPk": 2064640};let tot=0;const cur={};for(const k in sizes)tot+=sizes[k];
 const pct=()=>{const e=document.getElementById('pkPct');if(e&&tot)e.textContent=Math.min(99,Math.round(Object.values(cur).reduce((a,b)=>a+b,0)/tot*100));};
 const get=(id,u)=>fetch(u).then(r=>{if(!r.ok)throw new Error(u+' '+r.status);if(!r.body||!r.body.getReader)return r.arrayBuffer().then(b=>{cur[id]=b.byteLength;pct();return b;});
  const rd=r.body.getReader(),parts=[];let n=0;const pump=()=>rd.read().then(({done,value})=>{if(done){const o=new Uint8Array(n);let p=0;for(const c of parts){o.set(c,p);p+=c.length;}return o.buffer;}parts.push(value);n+=value.length;cur[id]=n;pct();return pump();});return pump();});
