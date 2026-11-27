@@ -1310,7 +1310,7 @@ function buildVK1(t){const L=VK1.L;if(!L)return;const el=document.getElementById
  const geo=k=>{const m=VK_META[k],[o1,o2,o3]=m.o,q=new Int16Array(BUF,o1,m.nv*3),u=new Uint16Array(BUF,o2,m.nv*2),I=m.nv<65536?new Uint16Array(BUF,o3,m.ni):new Uint32Array(BUF,o3,m.ni);
   const P=new Float32Array(m.nv*3),U=new Float32Array(m.nv*2);for(let i=0;i<P.length;i++)P[i]=q[i]/5000;for(let i=0;i<U.length;i++)U[i]=u[i]/65535;
   let g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(P,3));g.setAttribute('uv',new THREE.BufferAttribute(U,2));g.setIndex(new THREE.BufferAttribute(I.slice(),1));g=g.toNonIndexed();g.computeVertexNormals();return g;};
- const mt=k=>{const im=new Image(),tx=new THREE.Texture(im);im.onload=()=>{tx.needsUpdate=true;};im.src=VK_META[k].tex+'?v=e0507240f4';tx.anisotropy=4;return new THREE.MeshLambertMaterial({map:tx});};
+ const mt=k=>{const im=new Image(),tx=new THREE.Texture(im);im.onload=()=>{tx.needsUpdate=true;};im.src=VK_META[k].tex+'?v=c2a4fed8ab';tx.anisotropy=4;return new THREE.MeshLambertMaterial({map:tx});};
  const by={};for(const p of L.list)(by[p.k]=by[p.k]||[]).push(p);
  const m4=new THREE.Matrix4(),q=new THREE.Quaternion(),e=new THREE.Euler(),v=new THREE.Vector3(),sc=new THREE.Vector3();
  for(const k in by){const arr=by[k],im=new THREE.InstancedMesh(geo(k),mt(k),arr.length);arr.forEach((p,i)=>{const x=t.x+p.x,z=t.y+p.z;q.setFromEuler(e.set(0,p.r,0));m4.compose(v.set(x,hAt(x,z),z),q,sc.set(p.s,p.s,p.s));im.setMatrixAt(i,m4);});
@@ -2131,7 +2131,7 @@ const HK={ok:null,geo:{},live:new Set(),S:20,twoD:15,noTwo:1,staffA:Math.PI/2,or
 function hkInit(){if(HK.ok!==null)return HK.ok;HK.ok=false;try{const el=document.getElementById('heroPk');if(!el||typeof HERO_PM==='undefined')return false;
   HK.meta=HERO_PM;HK.buf=new Uint8Array(__PK[el.id]).buffer;
   const tx=b64=>{const im=new Image(),t=new THREE.Texture(im);im.onload=()=>{t.needsUpdate=true;};im.src='data:image/png;base64,'+b64;t.flipY=false;t.magFilter=THREE.NearestFilter;t.minFilter=THREE.NearestFilter;t.generateMipmaps=false;return t;};
-  HK.mat=new THREE.MeshPhongMaterial({map:tx(HK.meta.bc),emissiveMap:tx(HK.meta.em),emissive:new THREE.Color('#ffffff'),flatShading:true,skinning:true,shininess:14,specular:new THREE.Color('#2a2622')});
+  HK.mat=new THREE.MeshPhongMaterial({map:tx(HK.meta.bc),emissiveMap:tx(HK.meta.em),emissive:new THREE.Color('#ffffff'),flatShading:false,skinning:true,shininess:18,specular:new THREE.Color('#2a2622')});
   const B=HK.meta.bones;HK.par=B.map(b=>b.p);HK.idx={};B.forEach((b,i)=>HK.idx[b.n]=i);
   const ord=[],seen=new Set(),vis=i=>{if(seen.has(i))return;if(B[i].p>=0)vis(B[i].p);seen.add(i);ord.push(i);};B.forEach((b,i)=>vis(i));HK.ord=ord;
   HK.ok=true;}catch(e){console.warn('heroKit',e);HK.ok=false;}return HK.ok;}
@@ -2141,7 +2141,12 @@ function hkGeo(name,uv){const key=name+(uv?'@'+uv.join(','):'');if(HK.geo[key]!=
  const J=new Uint16Array(nv*4),j8=new Uint8Array(buf,o3,nv*4);for(let i=0;i<J.length;i++)J[i]=j8[i];const W=new Float32Array(nv*4),w8=new Uint8Array(buf,o4,nv*4);for(let i=0;i<W.length;i++)W[i]=w8[i]/255;
  const I=nv<65536?new Uint16Array(buf,o5,ni):new Uint32Array(buf,o5,ni);
  const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(P,3));g.setAttribute('uv',new THREE.BufferAttribute(U,2));g.setAttribute('skinIndex',new THREE.BufferAttribute(J,4));g.setAttribute('skinWeight',new THREE.BufferAttribute(W,4));
- g.setIndex(new THREE.BufferAttribute(I.slice(),1));g.computeVertexNormals();g.boundingSphere=new THREE.Sphere(new THREE.Vector3(0,1,0),1.35);return HK.geo[key]=g;}
+ g.setIndex(new THREE.BufferAttribute(I.slice(),1));g.computeVertexNormals();hkSmooth(g,P,nv);g.boundingSphere=new THREE.Sphere(new THREE.Vector3(0,1,0),1.35);return HK.geo[key]=g;}
+// smooth shading: vertices split by UV seams share one averaged normal unless the surfaces meet at a sharp angle (crease ~55°)
+function hkSmooth(g,P,nv){const N=g.attributes.normal.array,grp=new Map(),out=new Float32Array(N.length),cs=Math.cos(55*Math.PI/180);
+ for(let i=0;i<nv;i++){const k=Math.round(P[i*3]*2000)+'_'+Math.round(P[i*3+1]*2000)+'_'+Math.round(P[i*3+2]*2000);let a=grp.get(k);if(!a)grp.set(k,a=[]);a.push(i);}
+ for(const a of grp.values())for(const i of a){let x=0,y=0,z=0;const nx=N[i*3],ny=N[i*3+1],nz=N[i*3+2];for(const j of a){const mx=N[j*3],my=N[j*3+1],mz=N[j*3+2];if(nx*mx+ny*my+nz*mz>=cs){x+=mx;y+=my;z+=mz;}}const l=Math.hypot(x,y,z)||1;out[i*3]=x/l;out[i*3+1]=y/l;out[i*3+2]=z/l;}
+ g.setAttribute('normal',new THREE.BufferAttribute(out,3));}
 const _hq=new THREE.Quaternion(),_hq2=new THREE.Quaternion(),_hv=new THREE.Vector3(),_hv2=new THREE.Vector3();
 function hkAttach(p,cls){if(!hkInit()||!HK.VAR[cls])return;try{
  const B=HK.meta.bones,bones=B.map(b=>{const o=new THREE.Bone();o.name=b.n;o.position.fromArray(b.t);o.quaternion.fromArray(b.q);return o;});
@@ -6298,7 +6303,7 @@ window.claude?.hot?.snapshot?.(()=>({state:running?serialize():null}));
 window.claude?.hot?.ready?window.claude.hot.ready(boot):boot(window.claude?.hot?.data??{});
 </script>
 <div id="pkLoad" style="position:fixed;left:0;right:0;bottom:calc(env(safe-area-inset-bottom,0px) + 18px);text-align:center;z-index:9999;font:600 14px system-ui,sans-serif;color:#f3e6c8;text-shadow:0 1px 3px #000;pointer-events:none">Kraunama… <span id="pkPct">0</span>%</div>
-<script>window.__PK={};(function(){const L={"vegData": "d/veg.bin?v=e0507240f4", "vkPk": "d/vk.bin?v=e0507240f4", "heroAn": "d/anim.bin?v=e0507240f4", "heroPk": "d/hero.bin?v=e0507240f4", "townPk": "d/town.bin?v=e0507240f4", "dragonPk": "d/dragon.bin?v=e0507240f4", "dgkPk": "d/dgk.bin?v=e0507240f4"},sizes={"vegData": 1878408, "vkPk": 1088548, "heroAn": 662544, "heroPk": 3287460, "townPk": 392700, "dragonPk": 269688, "dgkPk": 1214946};let tot=0;const cur={};for(const k in sizes)tot+=sizes[k];
+<script>window.__PK={};(function(){const L={"vegData": "d/veg.bin?v=c2a4fed8ab", "vkPk": "d/vk.bin?v=c2a4fed8ab", "heroAn": "d/anim.bin?v=c2a4fed8ab", "heroPk": "d/hero.bin?v=c2a4fed8ab", "townPk": "d/town.bin?v=c2a4fed8ab", "dragonPk": "d/dragon.bin?v=c2a4fed8ab", "dgkPk": "d/dgk.bin?v=c2a4fed8ab"},sizes={"vegData": 1878408, "vkPk": 1088548, "heroAn": 662544, "heroPk": 3287460, "townPk": 392700, "dragonPk": 269688, "dgkPk": 1214946};let tot=0;const cur={};for(const k in sizes)tot+=sizes[k];
 const pct=()=>{const e=document.getElementById('pkPct');if(e&&tot)e.textContent=Math.min(99,Math.round(Object.values(cur).reduce((a,b)=>a+b,0)/tot*100));};
 const get=(id,u)=>fetch(u).then(r=>{if(!r.ok)throw new Error(u+' '+r.status);if(!r.body||!r.body.getReader)return r.arrayBuffer().then(b=>{cur[id]=b.byteLength;pct();return b;});
  const rd=r.body.getReader(),parts=[];let n=0;const pump=()=>rd.read().then(({done,value})=>{if(done){const o=new Uint8Array(n);let p=0;for(const c of parts){o.set(c,p);p+=c.length;}return o.buffer;}parts.push(value);n+=value.length;cur[id]=n;pct();return pump();});return pump();});
