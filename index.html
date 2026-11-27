@@ -997,7 +997,7 @@ function itemStatsBase(it){const L=it.lvl+(it.plus||0),m=RM[it.rar],r=v=>Math.ro
   case'necklace':return{hp:r(10+L*4),mp:r(5+L*2)};
   case'cape':return{def:r(2+L*.6),hp:r(10+L*5),spd:3};
   case'relic':return{atk:r(3+L*1.6),mp:r(L*2)};
-  case'mount':return{spd:15+it.tier*5};}
+  case'mount':return it.tier>=4?{atk:r(4+L*1.8),spd:15}:{spd:15+it.tier*5};}
  return{};}
 function itemStats(it){const s0=itemStats1(it);if(!it.abyss)return s0;const o=Object.assign({},s0);o.ls=(o.ls||0)+3;o.atkP=(o.atkP||0)+2;return o;}
 function itemStats1(it){const s=itemStatsBase(it);if(!ARMOR_SLOTS.includes(it.slot))return s;const k=AK[AT[it.cls||'war']],d=s.def||0,o=Object.assign({},s);
@@ -1310,7 +1310,7 @@ function buildVK1(t){const L=VK1.L;if(!L)return;const el=document.getElementById
  const geo=k=>{const m=VK_META[k],[o1,o2,o3]=m.o,q=new Int16Array(BUF,o1,m.nv*3),u=new Uint16Array(BUF,o2,m.nv*2),I=m.nv<65536?new Uint16Array(BUF,o3,m.ni):new Uint32Array(BUF,o3,m.ni);
   const P=new Float32Array(m.nv*3),U=new Float32Array(m.nv*2);for(let i=0;i<P.length;i++)P[i]=q[i]/5000;for(let i=0;i<U.length;i++)U[i]=u[i]/65535;
   let g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(P,3));g.setAttribute('uv',new THREE.BufferAttribute(U,2));g.setIndex(new THREE.BufferAttribute(I.slice(),1));g=g.toNonIndexed();g.computeVertexNormals();return g;};
- const mt=k=>{const im=new Image(),tx=new THREE.Texture(im);im.onload=()=>{tx.needsUpdate=true;};im.src=VK_META[k].tex+'?v=57592f9668';tx.anisotropy=4;return new THREE.MeshLambertMaterial({map:tx});};
+ const mt=k=>{const im=new Image(),tx=new THREE.Texture(im);im.onload=()=>{tx.needsUpdate=true;};im.src=VK_META[k].tex+'?v=e08cd9d62a';tx.anisotropy=4;return new THREE.MeshLambertMaterial({map:tx});};
  const by={};for(const p of L.list)(by[p.k]=by[p.k]||[]).push(p);
  const m4=new THREE.Matrix4(),q=new THREE.Quaternion(),e=new THREE.Euler(),v=new THREE.Vector3(),sc=new THREE.Vector3();
  for(const k in by){const arr=by[k],im=new THREE.InstancedMesh(geo(k),mt(k),arr.length);arr.forEach((p,i)=>{const x=t.x+p.x,z=t.y+p.z;q.setFromEuler(e.set(0,p.r,0));m4.compose(v.set(x,hAt(x,z),z),q,sc.set(p.s,p.s,p.s));im.setMatrixAt(i,m4);});
@@ -5457,7 +5457,7 @@ function itemDetail(it,actions,extra){
  if(it.cos)info=(info?info+' ':'')+COSTUMES[it.cos].d;
  else if(it.wing)info=(info?info+' ':'')+WINGS[it.wing].d+' Dėvima vietoj apsiausto.';
  else if(isExtra(it))info=(info?info+' ':'')+'Mitinis daiktas: jo neįmanoma pagerinti kalvėje ir jis retai randamas.';
- if(it.slot==='mount')info=(info?info+' ':'')+'Raitas gyvūnas didina judėjimo greitį.';
+ if(it.slot==='mount')info=(info?info+' ':'')+(it.tier>=4?'Smėlio liūtas suteikia jojikui galios ir šiek tiek greičio.':'Raitas gyvūnas didina judėjimo greitį.');
  openDetail({pic:itemPic(it),title:itemName(it),rar:it.rar,tags,stats:rows,info:info+(extra||''),actions});
 }
 function equip(id){const i=P.bag.findIndex(x=>x.id===id);if(i<0)return;const it=P.bag[i];if(!canEquip(it))return;const sl=targetSlot(it);const old=P.eq[sl];P.eq[sl]=it;P.bag.splice(i,1);if(old)P.bag.push(old);clampVitals();refreshHeroGear();save();toast('Užsidėta: '+itemName(it));}
@@ -6569,7 +6569,7 @@ window.claude?.hot?.snapshot?.(()=>({state:running?serialize():null}));
 window.claude?.hot?.ready?window.claude.hot.ready(boot):boot(window.claude?.hot?.data??{});
 </script>
 <div id="pkLoad" style="position:fixed;left:0;right:0;bottom:calc(env(safe-area-inset-bottom,0px) + 18px);text-align:center;z-index:9999;font:600 14px system-ui,sans-serif;color:#f3e6c8;text-shadow:0 1px 3px #000;pointer-events:none">Kraunama… <span id="pkPct">0</span>%</div>
-<script>window.__PK={};(function(){const L={"vegData": "d/veg.bin?v=57592f9668", "vkPk": "d/vk.bin?v=57592f9668", "heroAn": "d/anim.bin?v=57592f9668", "heroPk": "d/hero.bin?v=57592f9668", "townPk": "d/town.bin?v=57592f9668", "dragonPk": "d/dragon.bin?v=57592f9668", "dgkPk": "d/dgk.bin?v=57592f9668", "zkPk": "d/zk.bin?v=57592f9668"},sizes={"vegData": 1878408, "vkPk": 1088548, "heroAn": 662544, "heroPk": 3287460, "townPk": 392700, "dragonPk": 269688, "dgkPk": 1214946, "zkPk": 2064640};let tot=0;const cur={};for(const k in sizes)tot+=sizes[k];
+<script>window.__PK={};(function(){const L={"vegData": "d/veg.bin?v=e08cd9d62a", "vkPk": "d/vk.bin?v=e08cd9d62a", "heroAn": "d/anim.bin?v=e08cd9d62a", "heroPk": "d/hero.bin?v=e08cd9d62a", "townPk": "d/town.bin?v=e08cd9d62a", "dragonPk": "d/dragon.bin?v=e08cd9d62a", "dgkPk": "d/dgk.bin?v=e08cd9d62a", "zkPk": "d/zk.bin?v=e08cd9d62a"},sizes={"vegData": 1878408, "vkPk": 1088548, "heroAn": 662544, "heroPk": 3287460, "townPk": 392700, "dragonPk": 269688, "dgkPk": 1214946, "zkPk": 2064640};let tot=0;const cur={};for(const k in sizes)tot+=sizes[k];
 const pct=()=>{const e=document.getElementById('pkPct');if(e&&tot)e.textContent=Math.min(99,Math.round(Object.values(cur).reduce((a,b)=>a+b,0)/tot*100));};
 const get=(id,u)=>fetch(u).then(r=>{if(!r.ok)throw new Error(u+' '+r.status);if(!r.body||!r.body.getReader)return r.arrayBuffer().then(b=>{cur[id]=b.byteLength;pct();return b;});
  const rd=r.body.getReader(),parts=[];let n=0;const pump=()=>rd.read().then(({done,value})=>{if(done){const o=new Uint8Array(n);let p=0;for(const c of parts){o.set(c,p);p+=c.length;}return o.buffer;}parts.push(value);n+=value.length;cur[id]=n;pct();return pump();});return pump();});
