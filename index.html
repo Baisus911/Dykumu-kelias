@@ -845,7 +845,7 @@ if(typeof module!=='undefined')module.exports=root.VillageGen2;
 "use strict";
 const $=s=>document.querySelector(s);
 const SAVE_KEY='dykumu-kelias-v2',SAVE_PFX='dykumu-kelias-v3-';
-const WS=1.25,MAX_LV=60,BAG_CAP=20;
+const WS=1.25,MAX_LV=60,BAG_CAP=30;
 const rand=(a,b)=>a+Math.random()*(b-a);
 const randi=(a,b)=>Math.floor(rand(a,b+1));
 const clamp=(v,a,b)=>v<a?a:v>b?b:v;
@@ -1310,7 +1310,7 @@ function buildVK1(t){const L=VK1.L;if(!L)return;const el=document.getElementById
  const geo=k=>{const m=VK_META[k],[o1,o2,o3]=m.o,q=new Int16Array(BUF,o1,m.nv*3),u=new Uint16Array(BUF,o2,m.nv*2),I=m.nv<65536?new Uint16Array(BUF,o3,m.ni):new Uint32Array(BUF,o3,m.ni);
   const P=new Float32Array(m.nv*3),U=new Float32Array(m.nv*2);for(let i=0;i<P.length;i++)P[i]=q[i]/5000;for(let i=0;i<U.length;i++)U[i]=u[i]/65535;
   let g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(P,3));g.setAttribute('uv',new THREE.BufferAttribute(U,2));g.setIndex(new THREE.BufferAttribute(I.slice(),1));g=g.toNonIndexed();g.computeVertexNormals();return g;};
- const mt=k=>{const im=new Image(),tx=new THREE.Texture(im);im.onload=()=>{tx.needsUpdate=true;};im.src=VK_META[k].tex+'?v=2c7ab804f0';tx.anisotropy=4;return new THREE.MeshLambertMaterial({map:tx});};
+ const mt=k=>{const im=new Image(),tx=new THREE.Texture(im);im.onload=()=>{tx.needsUpdate=true;};im.src=VK_META[k].tex+'?v=40d31f67e3';tx.anisotropy=4;return new THREE.MeshLambertMaterial({map:tx});};
  const by={};for(const p of L.list)(by[p.k]=by[p.k]||[]).push(p);
  const m4=new THREE.Matrix4(),q=new THREE.Quaternion(),e=new THREE.Euler(),v=new THREE.Vector3(),sc=new THREE.Vector3();
  for(const k in by){const arr=by[k],im=new THREE.InstancedMesh(geo(k),mt(k),arr.length);arr.forEach((p,i)=>{const x=t.x+p.x,z=t.y+p.z;q.setFromEuler(e.set(0,p.r,0));m4.compose(v.set(x,hAt(x,z),z),q,sc.set(p.s,p.s,p.s));im.setMatrixAt(i,m4);});
@@ -4574,7 +4574,7 @@ function socTile(t,id){const c=t.dataset.t;
  if(c==='tgive'){if(TR.give.has(id))TR.give.delete(id);else TR.give.add(id);renderShop();return true;}
  if(c==='twant'){if(TR.want.has(id))TR.want.delete(id);else TR.want.add(id);renderShop();return true;}
  if(c==='mbuy'){const b=shopNpc.bot,g=genGoods(b)[id];if(!g)return true;const have=g.cr?P.credits:P.gold;
-  itemDetail(g.it,[{label:'Pirkti',sub:g.p+(g.cr?' kreditų':' aukso'),icon:'buy',cls:'go',disabled:have<g.p||P.bag.length>=BAG_CAP,fn:()=>{if(g.cr)P.credits-=g.p;else P.gold-=g.p;P.bag.push(g.it);b.goods=b.goods.filter(x=>x!==g);toast('Nupirkta: '+itemName(g.it),true);addChat(b.name,'Ačiū už pirkinį!');save();closeDetail();renderShop();}}],
+  itemDetail(g.it,[{label:P.bag.length>=BAG_CAP?'Krepšys pilnas':'Pirkti',sub:g.p+(g.cr?' kreditų':' aukso'),icon:'buy',cls:'go',disabled:have<g.p||P.bag.length>=BAG_CAP,fn:()=>{if(g.cr)P.credits-=g.p;else P.gold-=g.p;P.bag.push(g.it);b.goods=b.goods.filter(x=>x!==g);toast('Nupirkta: '+itemName(g.it),true);addChat(b.name,'Ačiū už pirkinį!');save();closeDetail();renderShop();}}],
    `<br><b>${escH(b.name)}</b> parduoda už ${g.p} ${g.cr?'kreditų':'aukso'}${P.bag.length>=BAG_CAP?' · krepšys pilnas':have<g.p?' · neužtenka':''}.`);return true;}
  if(c==='stl'){const it=P.bag.find(i=>i.id===id);if(!it)return true;const st=P.stall,s=st.sel[id],v=itemPrice(it);
   if(st.open){itemDetail(it,[{label:'Gerai',icon:'equip',fn:closeDetail}],'<br>Prekystalis atidarytas – kainą pakeisite jį uždarę.');return true;}
@@ -5615,7 +5615,7 @@ $('#shBody').addEventListener('click',e=>{
  if(e.target.closest('[data-al]')){alchDo();return;}
  const t=e.target.closest('.tile');if(!t)return;const id=+t.dataset.id;if(t.dataset.t==='alc'){ALC.sel=id;ALC.msg=null;renderShop();return;}if(socTile(t,id))return;
  if(t.dataset.t==='buy'){const it=stockCache.find(x=>x.id===id);if(!it)return;const cr=it.rar===3,pr=cr?creditPrice(it):itemPrice(it),have=cr?P.credits:P.gold;
-  itemDetail(it,[{label:'Pirkti',sub:pr+(cr?' kreditų':' aukso'),icon:'buy',cls:'go',disabled:have<pr||P.bag.length>=BAG_CAP,fn:()=>{const n=mkItem(it.slot,it.cls,it.tier,it.idx,it.rar);if(it.wing){n.wing=it.wing;n.lvl=1;}if(it.cos){n.cos=it.cos;n.lvl=1;}if(cr)P.credits-=pr;else P.gold-=pr;P.bag.push(n);toast('Nupirkta: '+itemName(n));renderShop();
+  itemDetail(it,[{label:P.bag.length>=BAG_CAP?'Krepšys pilnas':'Pirkti',sub:pr+(cr?' kreditų':' aukso'),icon:'buy',cls:'go',disabled:have<pr||P.bag.length>=BAG_CAP,fn:()=>{const n=mkItem(it.slot,it.cls,it.tier,it.idx,it.rar);if(it.wing){n.wing=it.wing;n.lvl=1;}if(it.cos){n.cos=it.cos;n.lvl=1;}if(cr)P.credits-=pr;else P.gold-=pr;P.bag.push(n);toast('Nupirkta: '+itemName(n));renderShop();
     if(canEquip(n))itemDetail(n,[{label:'Užsidėti dabar',icon:'equip',cls:'go',fn:()=>{equip(n.id);closeDetail();renderShop();}},{label:'Į krepšį',icon:'buy',cls:'ghost',fn:closeDetail}]);else closeDetail();}}]);}
  else if(t.dataset.t==='sellbag'){const it=P.bag.find(x=>x.id===id);if(!it)return;
   itemDetail(it,[{label:'Parduoti',sub:sellPrice(it)+' aukso',icon:'sell',fn:()=>{P.gold+=sellPrice(it);P.bag=P.bag.filter(x=>x!==it);save();closeDetail();renderShop();}},
@@ -6555,7 +6555,7 @@ window.claude?.hot?.snapshot?.(()=>({state:running?serialize():null}));
 window.claude?.hot?.ready?window.claude.hot.ready(boot):boot(window.claude?.hot?.data??{});
 </script>
 <div id="pkLoad" style="position:fixed;left:0;right:0;bottom:calc(env(safe-area-inset-bottom,0px) + 18px);text-align:center;z-index:9999;font:600 14px system-ui,sans-serif;color:#f3e6c8;text-shadow:0 1px 3px #000;pointer-events:none">Kraunama… <span id="pkPct">0</span>%</div>
-<script>window.__PK={};(function(){const L={"vegData": "d/veg.bin?v=2c7ab804f0", "vkPk": "d/vk.bin?v=2c7ab804f0", "heroAn": "d/anim.bin?v=2c7ab804f0", "heroPk": "d/hero.bin?v=2c7ab804f0", "townPk": "d/town.bin?v=2c7ab804f0", "dragonPk": "d/dragon.bin?v=2c7ab804f0", "dgkPk": "d/dgk.bin?v=2c7ab804f0", "zkPk": "d/zk.bin?v=2c7ab804f0"},sizes={"vegData": 1878408, "vkPk": 1088548, "heroAn": 662544, "heroPk": 3287460, "townPk": 392700, "dragonPk": 269688, "dgkPk": 1214946, "zkPk": 2064640};let tot=0;const cur={};for(const k in sizes)tot+=sizes[k];
+<script>window.__PK={};(function(){const L={"vegData": "d/veg.bin?v=40d31f67e3", "vkPk": "d/vk.bin?v=40d31f67e3", "heroAn": "d/anim.bin?v=40d31f67e3", "heroPk": "d/hero.bin?v=40d31f67e3", "townPk": "d/town.bin?v=40d31f67e3", "dragonPk": "d/dragon.bin?v=40d31f67e3", "dgkPk": "d/dgk.bin?v=40d31f67e3", "zkPk": "d/zk.bin?v=40d31f67e3"},sizes={"vegData": 1878408, "vkPk": 1088548, "heroAn": 662544, "heroPk": 3287460, "townPk": 392700, "dragonPk": 269688, "dgkPk": 1214946, "zkPk": 2064640};let tot=0;const cur={};for(const k in sizes)tot+=sizes[k];
 const pct=()=>{const e=document.getElementById('pkPct');if(e&&tot)e.textContent=Math.min(99,Math.round(Object.values(cur).reduce((a,b)=>a+b,0)/tot*100));};
 const get=(id,u)=>fetch(u).then(r=>{if(!r.ok)throw new Error(u+' '+r.status);if(!r.body||!r.body.getReader)return r.arrayBuffer().then(b=>{cur[id]=b.byteLength;pct();return b;});
  const rd=r.body.getReader(),parts=[];let n=0;const pump=()=>rd.read().then(({done,value})=>{if(done){const o=new Uint8Array(n);let p=0;for(const c of parts){o.set(c,p);p+=c.length;}return o.buffer;}parts.push(value);n+=value.length;cur[id]=n;pct();return pump();});return pump();});
