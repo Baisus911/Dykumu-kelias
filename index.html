@@ -1310,7 +1310,7 @@ function buildVK1(t){const L=VK1.L;if(!L)return;const el=document.getElementById
  const geo=k=>{const m=VK_META[k],[o1,o2,o3]=m.o,q=new Int16Array(BUF,o1,m.nv*3),u=new Uint16Array(BUF,o2,m.nv*2),I=m.nv<65536?new Uint16Array(BUF,o3,m.ni):new Uint32Array(BUF,o3,m.ni);
   const P=new Float32Array(m.nv*3),U=new Float32Array(m.nv*2);for(let i=0;i<P.length;i++)P[i]=q[i]/5000;for(let i=0;i<U.length;i++)U[i]=u[i]/65535;
   let g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(P,3));g.setAttribute('uv',new THREE.BufferAttribute(U,2));g.setIndex(new THREE.BufferAttribute(I.slice(),1));g=g.toNonIndexed();g.computeVertexNormals();return g;};
- const mt=k=>{const im=new Image(),tx=new THREE.Texture(im);im.onload=()=>{tx.needsUpdate=true;};im.src=VK_META[k].tex+'?v=4ac5071d99';tx.anisotropy=4;return new THREE.MeshLambertMaterial({map:tx});};
+ const mt=k=>{const im=new Image(),tx=new THREE.Texture(im);im.onload=()=>{tx.needsUpdate=true;};im.src=VK_META[k].tex+'?v=1a2ae6d57e';tx.anisotropy=4;return new THREE.MeshLambertMaterial({map:tx});};
  const by={};for(const p of L.list)(by[p.k]=by[p.k]||[]).push(p);
  const m4=new THREE.Matrix4(),q=new THREE.Quaternion(),e=new THREE.Euler(),v=new THREE.Vector3(),sc=new THREE.Vector3();
  for(const k in by){const arr=by[k],im=new THREE.InstancedMesh(geo(k),mt(k),arr.length);arr.forEach((p,i)=>{const x=t.x+p.x,z=t.y+p.z;q.setFromEuler(e.set(0,p.r,0));m4.compose(v.set(x,hAt(x,z),z),q,sc.set(p.s,p.s,p.s));im.setMatrixAt(i,m4);});
@@ -2180,18 +2180,47 @@ function hkAttach(p,cls){if(!hkInit()||!HK.VAR[cls])return;try{
 function hkPart(p,name,uv){const K=p.kit,key=name+(uv?'@':'');let m=K.parts[key];if(m!==undefined)return m;const g=hkGeo(name,uv,K.hi?2:1);if(!g)return K.parts[key]=null;
  m=new THREE.SkinnedMesh(g,HK.mat);m.castShadow=true;m.receiveShadow=true;K.holder.add(m);m.bind(K.skel,new THREE.Matrix4());m.visible=false;return K.parts[key]=m;}
 function hkVT(it){if(!it)return -1;if((it.tier||0)>=5)return 5;const l=it.lvl||((it.tier||1)*15);return l<=10?0:l<=24?1:l<=40?2:l<=55?3:l<=60?4:5;}
-// costumes on kit heroes: a full kit armour set with a costume tint (s = set index for body, h = helm set, -1 = bare head)
-HK.COS={1:{s:2,h:2,c:'#ffa8e6',e:'#3a0a30'},2:{s:4,h:4,c:'#ff7060',e:'#4a0800'},3:{s:2,h:1,c:'#c39cff',e:'#2a0a3a'},4:{s:3,h:3,c:'#ffe7a0',e:'#3a2800'},5:{s:3,h:-1,c:'#fff3d6',e:'#2a1c00'},6:{s:5,h:5,c:'#bfe8ff',e:'#0a3550'}};HK.cmat={};
-function hkCosMat(id){if(HK.cmat[id])return HK.cmat[id];const D=HK.COS[id],m=HK.mat.clone();m.color=new THREE.Color(D.c);m.userData.cos=id;if(id===6){m.shininess=60;m.specular=new THREE.Color('#9fdcff');}if(id===4||id===5){m.shininess=45;m.specular=new THREE.Color('#ffd27a');}return HK.cmat[id]=m;}
+// costumes on kit heroes: a kit armour set re-coloured per slot (motley colours) + the old costume's hat, collar, shoulder and back pieces fixed to the kit bones
+// s = armour set index, cols per slot: C chest, P legs, G gloves, B boots, S shoulders, T shirt/pants
+HK.COS={1:{s:2,cols:{C:'#b45cff',P:'#ff9a2a',G:'#4cd65e',B:'#ff9a2a',S:'#36d0c0',T:'#ff5ac8'}},
+ 2:{s:4,cols:{C:'#4a2a30',P:'#3a1c22',G:'#ff3a2a',B:'#ff3a2a',S:'#ff3a2a',T:'#3a1418'}},
+ 3:{s:1,cols:{C:'#8a46e0',P:'#ff8a1e',G:'#3e2a5e',B:'#6a4020',S:'#ff8a1e',T:'#4a2a7a'}},
+ 4:{s:3,cols:{C:'#ffe08a',P:'#ffe08a',G:'#40d8cc',B:'#ffd060',S:'#ffd060',T:'#2aa0a0'},sh:70},
+ 5:{s:3,cols:{C:'#fff6e6',P:'#fff6e6',G:'#4aa0ff',B:'#4aa0ff',S:'#ffe080',T:'#2a6ad0'},sh:45},
+ 6:{s:5,cols:{C:'#c4ecff',P:'#9fdcff',G:'#e8faff',B:'#9fdcff',S:'#e8faff',T:'#3a6ab0'},sh:90}};HK.cmat={};
+function hkCosMat(id,sl){const key=id+sl;if(HK.cmat[key])return HK.cmat[key];const D=HK.COS[id],c=D.cols[sl];if(!c)return HK.mat;const m=HK.mat.clone();m.color=new THREE.Color(c);
+ if(D.sh){m.shininess=D.sh;m.specular=new THREE.Color(id===6?'#bfe8ff':'#ffd27a');}return HK.cmat[key]=m;}
+function hkCosAcc(h,id){const K=h.kit;if(!K||!id)return null;K.cosAcc=K.cosAcc||{};if(K.cosAcc[id]!==undefined)return K.cosAcc[id];K.cosAcc[id]=[];
+ try{const I=HK.idx,fk=()=>{const a=new THREE.Group();a.userData.fore=new THREE.Group();a.userData.knee=new THREE.Group();return a;};
+  const Gh=new THREE.Group(),dB=new THREE.Group(),fh=Object.assign(Object.create(h),{body:dB,head:Gh,arms:[fk(),fk()],legs:[fk(),fk()]});
+  const CK=cosKit(fh);[null,cosClown,cosDevil,cosWitch,cosGold,cosSultan,cosIce][id](fh,CK);
+  const bp=bi=>new THREE.Vector3().setFromMatrixPosition(new THREE.Matrix4().copy(K.skel.boneInverses[bi]).invert());
+  const fix=(objs,bi,anchor,ref,sc)=>{if(bi===undefined||!objs.length)return;const w=new THREE.Group();w.position.copy(anchor).applyMatrix4(K.skel.boneInverses[bi]);w.quaternion.copy(K.Bq[bi]).invert();w.scale.setScalar(sc);
+   const inner=new THREE.Group();inner.position.set(-ref.x,-ref.y,-ref.z);w.add(inner);for(const o of objs)inner.add(o);w.traverse(o=>{if(o.isMesh){o.castShadow=true;o.visible=true;}});K.bones[bi].add(w);K.cosAcc[id].push(w);};
+  // hat on the head bone, sized to the kit head
+  const hb=I['DEF-spine.006'],g=hkGeo('Default_Male_Head_'+HK.TONE[K.cls],null,1);let hc=new THREE.Vector3(0,1.7,0),hr=.33;
+  if(g){g.computeBoundingBox();const bb=g.boundingBox;bb.getCenter(hc);hr=Math.max(.05,(bb.max.x-bb.min.x)/2);}
+  fix([...Gh.children],hb,hc,new THREE.Vector3(0,28.6,-.3),hr/5.8*(HK.hatS||1.12));
+  // body pieces: collars (neck), shoulder pieces (upper arms), back items (chest / hips); the rest of the old costume is dropped
+  const bs=(HK.cosBS||1.15)/HK.S,lift=-K.holder.position.y,col=[],back=[],tail=[],sh={};
+  for(const o of[...dB.children]){const q=o.position,ax=Math.abs(q.x);if(q.z<=-3&&(o.isGroup||(o.geometry&&o.geometry.type==='PlaneGeometry'))){(q.y<14?tail:back).push(o);}else if(q.y>=21&&(o.isGroup?ax>=5:ax>=7.6)){(sh[q.x<0?'n':'p']=sh[q.x<0?'n':'p']||[]).push(o);}else if(q.y>=21&&q.y<=25.5)col.push(o);}
+  const nb=I['DEF-spine.004'],cb=I['DEF-spine.003'],pb=I['DEF-spine']!==undefined?I['DEF-spine']:I['DEF-spine.001'];
+  if(nb!==undefined)fix(col,nb,bp(nb).add(new THREE.Vector3(0,.02,0)),new THREE.Vector3(0,23.3,0),bs);
+  if(cb!==undefined)fix(back,cb,bp(cb).add(new THREE.Vector3(0,0,-.03)),new THREE.Vector3(0,18.5,0),bs);
+  if(pb!==undefined)fix(tail,pb,bp(pb).add(new THREE.Vector3(0,0,-.03)),new THREE.Vector3(0,12.6,0),bs);
+  for(const sd of['n','p']){if(!sh[sd])continue;let ub=null;for(const nm of['DEF-upper_arm.R','DEF-upper_arm.L']){const b=I[nm];if(b!==undefined&&(bp(b).x<0)===(sd==='n'))ub=b;}
+   if(ub===null)continue;(K.cosShF=K.cosShF||{})[id]=1;const ref=sh[sd][0].position.clone();fix(sh[sd],ub,bp(ub).add(new THREE.Vector3(0,.06,0)),ref,bs*.9);}
+ }catch(e){console.warn('cosAcc',e);}
+ return K.cosAcc[id];}
 function hkGear(h,e){const K=h.kit;if(!K)return;const cls=K.cls,v=HK.VAR[cls],S=HK.SETS,tone=HK.TONE[cls];e=e||{};
- const on=true;h.kitOn=on;K.holder.visible=on;const CK=e.costume?HK.COS[e.costume.cos||1]:null,mat=CK?hkCosMat(e.costume.cos||1):HK.mat;
- const want=new Set(),add=(n,uv)=>{const m=hkPart(h,n,uv);if(m){m.visible=true;m.material=mat;want.add(m);}};
- let tH=hkVT(e.helm),tC=hkVT(e.chest),tP=hkVT(e.pants),tG=hkVT(e.gloves),tB=hkVT(e.boots),tS=hkVT(e.shoulders);if(CK){tH=CK.h;tC=tP=tG=tB=tS=CK.s;}const tBe=Math.max(tC,tP);
- add('Default_Male_Head_'+tone);add('Male_Shirt.002',HK.SHIRT[cls]);add('Male_Pants.002',HK.PANTS);
+ const on=true;h.kitOn=on;K.holder.visible=on;const cid=e.costume?(e.costume.cos||1):0,CK=cid?HK.COS[cid]:null;if(cid)hkCosAcc(h,cid);if(K.cosAcc)for(const k in K.cosAcc)for(const w of K.cosAcc[k])w.visible=(+k===cid);
+ const want=new Set(),add=(n,uv,sl)=>{const m=hkPart(h,n,uv);if(m){m.visible=true;m.material=CK&&sl?hkCosMat(cid,sl):HK.mat;want.add(m);}};
+ let tH=hkVT(e.helm),tC=hkVT(e.chest),tP=hkVT(e.pants),tG=hkVT(e.gloves),tB=hkVT(e.boots),tS=hkVT(e.shoulders);if(CK){tH=-1;tC=tP=tG=tB=tS=CK.s;if(K.cosShF&&K.cosShF[cid])tS=-1;}const tBe=Math.max(tC,tP);
+ add('Default_Male_Head_'+tone);add('Male_Shirt.002',HK.SHIRT[cls],'T');add('Male_Pants.002',HK.PANTS,'T');
  if(tG<1)add('Default_Male_Arms_'+tone);if(tB<0)add('Default_Male_Feet_'+tone);
  if(tH<1)for(const f of HK.FACE[cls])add(f);else{add('Headgear.'+S[tH]+'.'+v);if(tH>=4)add('HeadAttach.'+v);}
- if(tC>=1)add('Chestplate.'+S[tC]+'.'+v);if(tP>=1)add('Legguards.'+S[tP]+'.'+v);if(tG>=1)add('Gauntlets.'+S[tG]+'.'+v);if(tS>=1)add('Shoulder.'+S[tS]+'.'+v);
- if(tB>=0)add('Boots.'+S[Math.max(1,tB)]+'.'+v);if(tBe>=0)add('Belt.'+S[Math.max(1,tBe)]+'.'+v);
+ if(tC>=1)add('Chestplate.'+S[tC]+'.'+v,0,'C');if(tP>=1)add('Legguards.'+S[tP]+'.'+v,0,'P');if(tG>=1)add('Gauntlets.'+S[tG]+'.'+v,0,'G');if(tS>=1)add('Shoulder.'+S[tS]+'.'+v,0,'S');
+ if(tB>=0)add('Boots.'+S[Math.max(1,tB)]+'.'+v,0,'B');if(tBe>=0)add('Belt.'+S[Math.max(1,tBe)]+'.'+v,0,'S');
  for(const k in K.parts){const m=K.parts[k];if(m&&!want.has(m))m.visible=false;}
  // hide the old procedural body while the kit is on (weapons, cape and wings stay)
  const skip=new Set();for(const g of[h.weapon,h.off,h.nock,h.strings,h.cape,h.wingSet&&h.wingSet.grp,K.holder])if(g)g.traverse(o=>skip.add(o));
@@ -6340,7 +6369,7 @@ window.claude?.hot?.snapshot?.(()=>({state:running?serialize():null}));
 window.claude?.hot?.ready?window.claude.hot.ready(boot):boot(window.claude?.hot?.data??{});
 </script>
 <div id="pkLoad" style="position:fixed;left:0;right:0;bottom:calc(env(safe-area-inset-bottom,0px) + 18px);text-align:center;z-index:9999;font:600 14px system-ui,sans-serif;color:#f3e6c8;text-shadow:0 1px 3px #000;pointer-events:none">Kraunama… <span id="pkPct">0</span>%</div>
-<script>window.__PK={};(function(){const L={"vegData": "d/veg.bin?v=4ac5071d99", "vkPk": "d/vk.bin?v=4ac5071d99", "heroAn": "d/anim.bin?v=4ac5071d99", "heroPk": "d/hero.bin?v=4ac5071d99", "townPk": "d/town.bin?v=4ac5071d99", "dragonPk": "d/dragon.bin?v=4ac5071d99", "dgkPk": "d/dgk.bin?v=4ac5071d99"},sizes={"vegData": 1878408, "vkPk": 1088548, "heroAn": 662544, "heroPk": 3287460, "townPk": 392700, "dragonPk": 269688, "dgkPk": 1214946};let tot=0;const cur={};for(const k in sizes)tot+=sizes[k];
+<script>window.__PK={};(function(){const L={"vegData": "d/veg.bin?v=1a2ae6d57e", "vkPk": "d/vk.bin?v=1a2ae6d57e", "heroAn": "d/anim.bin?v=1a2ae6d57e", "heroPk": "d/hero.bin?v=1a2ae6d57e", "townPk": "d/town.bin?v=1a2ae6d57e", "dragonPk": "d/dragon.bin?v=1a2ae6d57e", "dgkPk": "d/dgk.bin?v=1a2ae6d57e"},sizes={"vegData": 1878408, "vkPk": 1088548, "heroAn": 662544, "heroPk": 3287460, "townPk": 392700, "dragonPk": 269688, "dgkPk": 1214946};let tot=0;const cur={};for(const k in sizes)tot+=sizes[k];
 const pct=()=>{const e=document.getElementById('pkPct');if(e&&tot)e.textContent=Math.min(99,Math.round(Object.values(cur).reduce((a,b)=>a+b,0)/tot*100));};
 const get=(id,u)=>fetch(u).then(r=>{if(!r.ok)throw new Error(u+' '+r.status);if(!r.body||!r.body.getReader)return r.arrayBuffer().then(b=>{cur[id]=b.byteLength;pct();return b;});
  const rd=r.body.getReader(),parts=[];let n=0;const pump=()=>rd.read().then(({done,value})=>{if(done){const o=new Uint8Array(n);let p=0;for(const c of parts){o.set(c,p);p+=c.length;}return o.buffer;}parts.push(value);n+=value.length;cur[id]=n;pct();return pump();});return pump();});
