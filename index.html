@@ -1310,7 +1310,7 @@ function buildVK1(t){const L=VK1.L;if(!L)return;const el=document.getElementById
  const geo=k=>{const m=VK_META[k],[o1,o2,o3]=m.o,q=new Int16Array(BUF,o1,m.nv*3),u=new Uint16Array(BUF,o2,m.nv*2),I=m.nv<65536?new Uint16Array(BUF,o3,m.ni):new Uint32Array(BUF,o3,m.ni);
   const P=new Float32Array(m.nv*3),U=new Float32Array(m.nv*2);for(let i=0;i<P.length;i++)P[i]=q[i]/5000;for(let i=0;i<U.length;i++)U[i]=u[i]/65535;
   let g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(P,3));g.setAttribute('uv',new THREE.BufferAttribute(U,2));g.setIndex(new THREE.BufferAttribute(I.slice(),1));g=g.toNonIndexed();g.computeVertexNormals();return g;};
- const mt=k=>{const im=new Image(),tx=new THREE.Texture(im);im.onload=()=>{tx.needsUpdate=true;};im.src=VK_META[k].tex+'?v=d087c36a40';tx.anisotropy=4;return new THREE.MeshLambertMaterial({map:tx});};
+ const mt=k=>{const im=new Image(),tx=new THREE.Texture(im);im.onload=()=>{tx.needsUpdate=true;};im.src=VK_META[k].tex+'?v=57592f9668';tx.anisotropy=4;return new THREE.MeshLambertMaterial({map:tx});};
  const by={};for(const p of L.list)(by[p.k]=by[p.k]||[]).push(p);
  const m4=new THREE.Matrix4(),q=new THREE.Quaternion(),e=new THREE.Euler(),v=new THREE.Vector3(),sc=new THREE.Vector3();
  for(const k in by){const arr=by[k],im=new THREE.InstancedMesh(geo(k),mt(k),arr.length);arr.forEach((p,i)=>{const x=t.x+p.x,z=t.y+p.z;q.setFromEuler(e.set(0,p.r,0));m4.compose(v.set(x,hAt(x,z),z),q,sc.set(p.s,p.s,p.s));im.setMatrixAt(i,m4);});
@@ -2182,7 +2182,7 @@ function hkPart(p,name,uv){const K=p.kit,key=name+(uv?'@':'');let m=K.parts[key]
 function hkVT(it){if(!it)return -1;if((it.tier||0)>=5)return 5;const l=it.lvl||((it.tier||1)*15);return l<=10?0:l<=24?1:l<=40?2:l<=55?3:l<=60?4:5;}
 // costumes on kit heroes: a kit armour set re-coloured per slot (motley colours) + the old costume's hat, collar, shoulder and back pieces fixed to the kit bones
 // s = armour set index, cols per slot: C chest, P legs, G gloves, B boots, S shoulders, T shirt/pants
-HK.COSA={1:{hat:1.4,col:{dy:1.6,sy:.5,s:.9},leg:.62,arm:.66},2:{hat:1.3,arm:.6,leg:.5,noThigh:1,shinL:.72},3:{hat:1.35,leg:.48,arm:.56},4:{hat:1.3,arm:.55,leg:.5},5:{hat:1.35,arm:.56,leg:.44},6:{hat:1.35,arm:.52,leg:.46}};
+HK.COSA={1:{hy:.2,hat:1.4,col:{dy:1.6,sy:.5,s:.9},leg:.62,arm:.66},2:{hy:.25,hat:1.3,arm:.6,leg:.5,noThigh:1,shinL:.72},3:{hy:.18,hat:1.35,leg:.48,arm:.56},4:{hy:.3,hat:1.3,arm:.55,leg:.5},5:{hy:.38,hat:1.35,arm:.56,leg:.44},6:{hy:.22,hat:1.35,arm:.52,leg:.46}};
 HK.COS={1:{s:2,cols:{C:'#b45cff',P:'#ff9a2a',G:'#4cd65e',B:'#ff9a2a',S:'#36d0c0',T:'#ff5ac8'}},
  2:{s:4,cols:{C:'#4a2a30',P:'#3a1c22',G:'#ff3a2a',B:'#ff3a2a',S:'#ff3a2a',T:'#3a1418'}},
  3:{s:1,cols:{C:'#8a46e0',P:'#ff8a1e',G:'#3e2a5e',B:'#6a4020',S:'#ff8a1e',T:'#4a2a7a'}},
@@ -2199,9 +2199,9 @@ function hkCosAcc(h,id){const K=h.kit;if(!K||!id)return null;K.cosAcc=K.cosAcc||
   const fix=(objs,bi,anchor,ref,sc,isc)=>{if(bi===undefined||!objs.length)return;const w=new THREE.Group();w.position.copy(anchor).applyMatrix4(K.skel.boneInverses[bi]);w.quaternion.copy(K.Bq[bi]).invert();w.scale.setScalar(sc);
    const inner=new THREE.Group();if(isc){inner.scale.copy(isc);}inner.position.set(-ref.x*(isc?isc.x:1),-ref.y*(isc?isc.y:1),-ref.z*(isc?isc.z:1));w.add(inner);for(const o of objs)inner.add(o);w.traverse(o=>{if(o.isMesh){o.castShadow=true;o.visible=true;}});K.bones[bi].add(w);K.cosAcc[id].push(w);};
   // hat on the head bone, sized to the kit head
-  const hb=I['DEF-spine.006'],g=hkGeo('Default_Male_Head_'+HK.TONE[K.cls],null,1);let hc=new THREE.Vector3(0,1.7,0),hr=.33;
-  if(g){g.computeBoundingBox();const bb=g.boundingBox;bb.getCenter(hc);hr=Math.max(.05,(bb.max.x-bb.min.x)/2);}
-  const CA=HK.COSA[id]||{};fix([...Gh.children],hb,hc,new THREE.Vector3(0,28.6,-.3),hr/5.8*(HK.hatS||1.12)*(CA.hat||1.25));
+  const hb=I['DEF-spine.006'],g=hkGeo('Default_Male_Head_'+HK.TONE[K.cls],null,1);let hc=new THREE.Vector3(0,1.7,0),hr=.33,rv=.33;
+  if(g){g.computeBoundingBox();const bb=g.boundingBox;bb.getCenter(hc);hr=Math.max(.05,(bb.max.x-bb.min.x)/2);rv=Math.max(.05,bb.max.y-hc.y);}
+  const CA=HK.COSA[id]||{};hc.y+=rv*(.5+(CA.hy||.15));fix([...Gh.children],hb,hc,new THREE.Vector3(0,31.5,-.3),hr/5.8*(HK.hatS||1.12)*(CA.hat||1.25));
   // body pieces: collars (neck), shoulder pieces (upper arms), back items (chest / hips); the rest of the old costume is dropped
   const bs=(HK.cosBS||1.15)/HK.S,lift=-K.holder.position.y,col=[],back=[],tail=[],sh={};
   for(const o of[...dB.children]){const q=o.position,ax=Math.abs(q.x);if(q.z<=-3&&(o.isGroup||(o.geometry&&o.geometry.type==='PlaneGeometry'))){(q.y<14?tail:back).push(o);}else if(q.y>=21&&(o.isGroup?ax>=5:ax>=7.6)){(sh[q.x<0?'n':'p']=sh[q.x<0?'n':'p']||[]).push(o);}else if(q.y>=21&&q.y<=25.5)col.push(o);}
@@ -6569,7 +6569,7 @@ window.claude?.hot?.snapshot?.(()=>({state:running?serialize():null}));
 window.claude?.hot?.ready?window.claude.hot.ready(boot):boot(window.claude?.hot?.data??{});
 </script>
 <div id="pkLoad" style="position:fixed;left:0;right:0;bottom:calc(env(safe-area-inset-bottom,0px) + 18px);text-align:center;z-index:9999;font:600 14px system-ui,sans-serif;color:#f3e6c8;text-shadow:0 1px 3px #000;pointer-events:none">Kraunama… <span id="pkPct">0</span>%</div>
-<script>window.__PK={};(function(){const L={"vegData": "d/veg.bin?v=d087c36a40", "vkPk": "d/vk.bin?v=d087c36a40", "heroAn": "d/anim.bin?v=d087c36a40", "heroPk": "d/hero.bin?v=d087c36a40", "townPk": "d/town.bin?v=d087c36a40", "dragonPk": "d/dragon.bin?v=d087c36a40", "dgkPk": "d/dgk.bin?v=d087c36a40", "zkPk": "d/zk.bin?v=d087c36a40"},sizes={"vegData": 1878408, "vkPk": 1088548, "heroAn": 662544, "heroPk": 3287460, "townPk": 392700, "dragonPk": 269688, "dgkPk": 1214946, "zkPk": 2064640};let tot=0;const cur={};for(const k in sizes)tot+=sizes[k];
+<script>window.__PK={};(function(){const L={"vegData": "d/veg.bin?v=57592f9668", "vkPk": "d/vk.bin?v=57592f9668", "heroAn": "d/anim.bin?v=57592f9668", "heroPk": "d/hero.bin?v=57592f9668", "townPk": "d/town.bin?v=57592f9668", "dragonPk": "d/dragon.bin?v=57592f9668", "dgkPk": "d/dgk.bin?v=57592f9668", "zkPk": "d/zk.bin?v=57592f9668"},sizes={"vegData": 1878408, "vkPk": 1088548, "heroAn": 662544, "heroPk": 3287460, "townPk": 392700, "dragonPk": 269688, "dgkPk": 1214946, "zkPk": 2064640};let tot=0;const cur={};for(const k in sizes)tot+=sizes[k];
 const pct=()=>{const e=document.getElementById('pkPct');if(e&&tot)e.textContent=Math.min(99,Math.round(Object.values(cur).reduce((a,b)=>a+b,0)/tot*100));};
 const get=(id,u)=>fetch(u).then(r=>{if(!r.ok)throw new Error(u+' '+r.status);if(!r.body||!r.body.getReader)return r.arrayBuffer().then(b=>{cur[id]=b.byteLength;pct();return b;});
  const rd=r.body.getReader(),parts=[];let n=0;const pump=()=>rd.read().then(({done,value})=>{if(done){const o=new Uint8Array(n);let p=0;for(const c of parts){o.set(c,p);p+=c.length;}return o.buffer;}parts.push(value);n+=value.length;cur[id]=n;pct();return pump();});return pump();});
