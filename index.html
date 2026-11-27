@@ -1310,7 +1310,7 @@ function buildVK1(t){const L=VK1.L;if(!L)return;const el=document.getElementById
  const geo=k=>{const m=VK_META[k],[o1,o2,o3]=m.o,q=new Int16Array(BUF,o1,m.nv*3),u=new Uint16Array(BUF,o2,m.nv*2),I=m.nv<65536?new Uint16Array(BUF,o3,m.ni):new Uint32Array(BUF,o3,m.ni);
   const P=new Float32Array(m.nv*3),U=new Float32Array(m.nv*2);for(let i=0;i<P.length;i++)P[i]=q[i]/5000;for(let i=0;i<U.length;i++)U[i]=u[i]/65535;
   let g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(P,3));g.setAttribute('uv',new THREE.BufferAttribute(U,2));g.setIndex(new THREE.BufferAttribute(I.slice(),1));g=g.toNonIndexed();g.computeVertexNormals();return g;};
- const mt=k=>{const im=new Image(),tx=new THREE.Texture(im);im.onload=()=>{tx.needsUpdate=true;};im.src=VK_META[k].tex+'?v=4d78224f98';tx.anisotropy=4;return new THREE.MeshLambertMaterial({map:tx});};
+ const mt=k=>{const im=new Image(),tx=new THREE.Texture(im);im.onload=()=>{tx.needsUpdate=true;};im.src=VK_META[k].tex+'?v=79d45e1cf3';tx.anisotropy=4;return new THREE.MeshLambertMaterial({map:tx});};
  const by={};for(const p of L.list)(by[p.k]=by[p.k]||[]).push(p);
  const m4=new THREE.Matrix4(),q=new THREE.Quaternion(),e=new THREE.Euler(),v=new THREE.Vector3(),sc=new THREE.Vector3();
  for(const k in by){const arr=by[k],im=new THREE.InstancedMesh(geo(k),mt(k),arr.length);arr.forEach((p,i)=>{const x=t.x+p.x,z=t.y+p.z;q.setFromEuler(e.set(0,p.r,0));m4.compose(v.set(x,hAt(x,z),z),q,sc.set(p.s,p.s,p.s));im.setMatrixAt(i,m4);});
@@ -2180,10 +2180,13 @@ function hkAttach(p,cls){if(!hkInit()||!HK.VAR[cls])return;try{
 function hkPart(p,name,uv){const K=p.kit,key=name+(uv?'@':'');let m=K.parts[key];if(m!==undefined)return m;const g=hkGeo(name,uv,K.hi?2:1);if(!g)return K.parts[key]=null;
  m=new THREE.SkinnedMesh(g,HK.mat);m.castShadow=true;m.receiveShadow=true;K.holder.add(m);m.bind(K.skel,new THREE.Matrix4());m.visible=false;return K.parts[key]=m;}
 function hkVT(it){if(!it)return -1;if((it.tier||0)>=5)return 5;const l=it.lvl||((it.tier||1)*15);return l<=10?0:l<=24?1:l<=40?2:l<=55?3:l<=60?4:5;}
+// costumes on kit heroes: a full kit armour set with a costume tint (s = set index for body, h = helm set, -1 = bare head)
+HK.COS={1:{s:2,h:2,c:'#ffa8e6',e:'#3a0a30'},2:{s:4,h:4,c:'#ff7060',e:'#4a0800'},3:{s:2,h:1,c:'#c39cff',e:'#2a0a3a'},4:{s:3,h:3,c:'#ffe7a0',e:'#3a2800'},5:{s:3,h:-1,c:'#fff3d6',e:'#2a1c00'},6:{s:5,h:5,c:'#bfe8ff',e:'#0a3550'}};HK.cmat={};
+function hkCosMat(id){if(HK.cmat[id])return HK.cmat[id];const D=HK.COS[id],m=HK.mat.clone();m.color=new THREE.Color(D.c);m.userData.cos=id;if(id===6){m.shininess=60;m.specular=new THREE.Color('#9fdcff');}if(id===4||id===5){m.shininess=45;m.specular=new THREE.Color('#ffd27a');}return HK.cmat[id]=m;}
 function hkGear(h,e){const K=h.kit;if(!K)return;const cls=K.cls,v=HK.VAR[cls],S=HK.SETS,tone=HK.TONE[cls];e=e||{};
- const on=!e.costume;h.kitOn=on;K.holder.visible=on;
- const want=new Set(),add=(n,uv)=>{const m=hkPart(h,n,uv);if(m){m.visible=true;want.add(m);}};
- const tH=hkVT(e.helm),tC=hkVT(e.chest),tP=hkVT(e.pants),tG=hkVT(e.gloves),tB=hkVT(e.boots),tS=hkVT(e.shoulders),tBe=Math.max(tC,tP);
+ const on=true;h.kitOn=on;K.holder.visible=on;const CK=e.costume?HK.COS[e.costume.cos||1]:null,mat=CK?hkCosMat(e.costume.cos||1):HK.mat;
+ const want=new Set(),add=(n,uv)=>{const m=hkPart(h,n,uv);if(m){m.visible=true;m.material=mat;want.add(m);}};
+ let tH=hkVT(e.helm),tC=hkVT(e.chest),tP=hkVT(e.pants),tG=hkVT(e.gloves),tB=hkVT(e.boots),tS=hkVT(e.shoulders);if(CK){tH=CK.h;tC=tP=tG=tB=tS=CK.s;}const tBe=Math.max(tC,tP);
  add('Default_Male_Head_'+tone);add('Male_Shirt.002',HK.SHIRT[cls]);add('Male_Pants.002',HK.PANTS);
  if(tG<1)add('Default_Male_Arms_'+tone);if(tB<0)add('Default_Male_Feet_'+tone);
  if(tH<1)for(const f of HK.FACE[cls])add(f);else{add('Headgear.'+S[tH]+'.'+v);if(tH>=4)add('HeadAttach.'+v);}
@@ -2548,7 +2551,7 @@ const COS_AURA={1:['#ff6ad0','#ffd23a','#5ae0ff','#7aff5a'],2:['#ff4a1a','#ff9a2
 function costumeAura(h,E,dt){const c=P&&E===P?P.eq.costume:null;if(!c||P.dead)return;h.cauT=(h.cauT||0)-dt;if(h.cauT>0)return;const id=c.cos||1,cols=COS_AURA[id];h.cauT=GFX==='high'?(E.moving?.07:.14):.3;
  const col=cols[randi(0,cols.length-1)],x=E.x+rand(-12,12),y=E.y+rand(-12,12);
  if(id===2)addVapor(x,y,6+Math.random()*10,col,2,7,.8,true);else if(id===6)addParts(x,y,30+Math.random()*12,col,1,1.2,.6);else if(id===3)addVapor(x,y,10+Math.random()*20,col,3,10,.9,true);else addParts(x,y,10+Math.random()*26,col,1,.9,.5);}
-function costumeApply(h,c,e){if(!h||!h.body)return;const id=c?(c.cos||1):0;if(!h.cosSets)h.cosSets={};if(id&&!h.cosSets[id])h.cosSets[id]=buildCostume(h,id);
+function costumeApply(h,c,e){if(!h||!h.body)return;const id=c?(c.cos||1):0;if(!h.cosSets)h.cosSets={};if(id&&!h.cosSets[id]&&!h.kit)h.cosSets[id]=buildCostume(h,id);
  for(const k in h.cosSets)for(const p of h.cosSets[k])p.visible=(+k===id);const on=!!id,D=on?COSTUMES[id]:null;
  if(on){h.plate.visible=false;h.shoulders.forEach(b=>{b.visible=false;});h.gloves.forEach(b=>{b.visible=false;});if(h.cape)h.cape.visible=false;if(h.neck)h.neck.visible=false;if(D.wings&&!(e&&e.cape&&e.cape.wing))setHeroWings(h,D.wings);}
  if(h.hat)h.hat.visible=!on;if(h.hairParts)for(const p of h.hairParts)p.visible=!on||!!(D&&D.hair);if(h.extras)for(const p of h.extras)p.visible=!on;}
@@ -2576,7 +2579,7 @@ function applyGear(h,eq){
  setHeroWings(h,e.cape&&e.cape.wing?e.cape.wing:0);h.cape.visible=!!e.cape&&!e.cape.wing;if(e.cape){const ct=e.cape.tier;h.capeMat.color.set(CAPE_COL[ct-1]);for(const q of h.capeParts)q.mesh.visible=q.tag==='main'||(q.tag==='top'&&ct>=2)||(q.tag==='hem'&&ct>=3)||(q.tag==='l1'&&ct>=3)||(q.tag==='l2'&&ct>=4);h.capeClasps.forEach(c=>{c.visible=ct>=2;});}
  costumeApply(h,e.costume,e);if(h.kit)hkGear(h,e);
  if(h.kitSh)for(const m of h.kitSh)m.visible=!e.shoulders&&!e.costume;
- if(!e.costume&&h.hat&&(h.cls==='swd'||h.cls==='arc'||h.cls==='dag')){h.hat.visible=!!e.helm;}if(h.kitHelm)for(const m of h.kitHelm)m.visible=!e.helm&&!e.costume;
+ if(!e.costume&&h.hat&&(h.cls==='swd'||h.cls==='arc'||h.cls==='dag')){h.hat.visible=!!e.helm;}if(h.kitHelm)for(const m of h.kitHelm)m.visible=!e.helm&&!(e.costume&&!h.kit);
  heroFlat(h);
  h.off.visible=!!(e.offhand&&e.offhand.cls===h.cls);if(h.oms)h.oms.forEach((m,i)=>{m.visible=i===((e.offhand&&e.offhand.cls===h.cls)?(WM[h.cls]&&WM[h.cls].lv?wIdx(h.cls,e.offhand,e.offhand.tier):e.offhand.tier-1):0);});if(e.offhand){h.offMat.color.set(tc(e.offhand));if(h.offOrb)h.offOrb.material.color.set(e.offhand.tier>=2?shadeHex(tc(e.offhand),1.2):'#7fe8d8');}
 }
@@ -6183,7 +6186,7 @@ function selInit(){if(SEL.r||!SEL.ok)return!!SEL.r;if(typeof THREE==='undefined'
  return true;}
 function showcaseEq(k){const it=(slot,tier,rar)=>({slot,cls:k,tier,idx:1,rar,lvl:25});const e={weapon:it('weapon',3,2),helm:it('helm',3,1),chest:it('chest',3,1),shoulders:it('shoulders',3,1),gloves:it('gloves',3,1),pants:it('pants',3,1),boots:it('boots',3,1),cape:{slot:'cape',tier:3,rar:1}};if(k!=='dag'&&k!=='war')e.offhand=it('offhand',3,1);return e;}
 function selSetHero(k){if(!selInit())return;const sv=ST.saves[k],sex=stSex(k);if(SEL.hero&&SEL.k===k&&SEL.hero.fem===(sex==='f'))return;
- if(SEL.hero)SEL.scene.remove(SEL.hero.root);HK.hiNext=true;const h=makeHero(k,sex);HK.hiNext=false;const eq=sv&&sv.P.eq?Object.assign({},sv.P.eq):showcaseEq(k);applyGear(h,eq);SEL.hero=h;SEL.k=k;SEL.scene.add(h.root);SEL.spawnT=0;
+ if(SEL.hero)SEL.scene.remove(SEL.hero.root);HK.hiNext=true;const h=makeHero(k,sex);HK.hiNext=false;const eq=sv&&sv.P.eq?Object.assign({},sv.P.eq):showcaseEq(k);eq.costume=null;applyGear(h,eq);SEL.hero=h;SEL.k=k;SEL.scene.add(h.root);SEL.spawnT=0;
  const col=new THREE.Color(CL[k].trim||'#ffd27a');SEL.ring.material.color.copy(col);SEL.runes.material.color.copy(col).lerp(new THREE.Color('#ffffff'),.4);SEL.beam.material.color.copy(col).lerp(new THREE.Color('#ffffff'),.5);
  for(const m of SEL.motes)m.material.color.copy(col).lerp(new THREE.Color('#ffffff'),Math.random()*.5);}
 function renderSel(dt){if(!SEL.r||!SEL.hero)return;const host=$('#selStage');if(SEL.canvas.parentNode!==host)host.appendChild(SEL.canvas);
@@ -6318,7 +6321,7 @@ window.claude?.hot?.snapshot?.(()=>({state:running?serialize():null}));
 window.claude?.hot?.ready?window.claude.hot.ready(boot):boot(window.claude?.hot?.data??{});
 </script>
 <div id="pkLoad" style="position:fixed;left:0;right:0;bottom:calc(env(safe-area-inset-bottom,0px) + 18px);text-align:center;z-index:9999;font:600 14px system-ui,sans-serif;color:#f3e6c8;text-shadow:0 1px 3px #000;pointer-events:none">Kraunama… <span id="pkPct">0</span>%</div>
-<script>window.__PK={};(function(){const L={"vegData": "d/veg.bin?v=4d78224f98", "vkPk": "d/vk.bin?v=4d78224f98", "heroAn": "d/anim.bin?v=4d78224f98", "heroPk": "d/hero.bin?v=4d78224f98", "townPk": "d/town.bin?v=4d78224f98", "dragonPk": "d/dragon.bin?v=4d78224f98", "dgkPk": "d/dgk.bin?v=4d78224f98"},sizes={"vegData": 1878408, "vkPk": 1088548, "heroAn": 662544, "heroPk": 3287460, "townPk": 392700, "dragonPk": 269688, "dgkPk": 1214946};let tot=0;const cur={};for(const k in sizes)tot+=sizes[k];
+<script>window.__PK={};(function(){const L={"vegData": "d/veg.bin?v=79d45e1cf3", "vkPk": "d/vk.bin?v=79d45e1cf3", "heroAn": "d/anim.bin?v=79d45e1cf3", "heroPk": "d/hero.bin?v=79d45e1cf3", "townPk": "d/town.bin?v=79d45e1cf3", "dragonPk": "d/dragon.bin?v=79d45e1cf3", "dgkPk": "d/dgk.bin?v=79d45e1cf3"},sizes={"vegData": 1878408, "vkPk": 1088548, "heroAn": 662544, "heroPk": 3287460, "townPk": 392700, "dragonPk": 269688, "dgkPk": 1214946};let tot=0;const cur={};for(const k in sizes)tot+=sizes[k];
 const pct=()=>{const e=document.getElementById('pkPct');if(e&&tot)e.textContent=Math.min(99,Math.round(Object.values(cur).reduce((a,b)=>a+b,0)/tot*100));};
 const get=(id,u)=>fetch(u).then(r=>{if(!r.ok)throw new Error(u+' '+r.status);if(!r.body||!r.body.getReader)return r.arrayBuffer().then(b=>{cur[id]=b.byteLength;pct();return b;});
  const rd=r.body.getReader(),parts=[];let n=0;const pump=()=>rd.read().then(({done,value})=>{if(done){const o=new Uint8Array(n);let p=0;for(const c of parts){o.set(c,p);p+=c.length;}return o.buffer;}parts.push(value);n+=value.length;cur[id]=n;pct();return pump();});return pump();});
