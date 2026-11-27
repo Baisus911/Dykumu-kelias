@@ -1310,7 +1310,7 @@ function buildVK1(t){const L=VK1.L;if(!L)return;const el=document.getElementById
  const geo=k=>{const m=VK_META[k],[o1,o2,o3]=m.o,q=new Int16Array(BUF,o1,m.nv*3),u=new Uint16Array(BUF,o2,m.nv*2),I=m.nv<65536?new Uint16Array(BUF,o3,m.ni):new Uint32Array(BUF,o3,m.ni);
   const P=new Float32Array(m.nv*3),U=new Float32Array(m.nv*2);for(let i=0;i<P.length;i++)P[i]=q[i]/5000;for(let i=0;i<U.length;i++)U[i]=u[i]/65535;
   let g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(P,3));g.setAttribute('uv',new THREE.BufferAttribute(U,2));g.setIndex(new THREE.BufferAttribute(I.slice(),1));g=g.toNonIndexed();g.computeVertexNormals();return g;};
- const mt=k=>{const im=new Image(),tx=new THREE.Texture(im);im.onload=()=>{tx.needsUpdate=true;};im.src=VK_META[k].tex+'?v=2da29312ec';tx.anisotropy=4;return new THREE.MeshLambertMaterial({map:tx});};
+ const mt=k=>{const im=new Image(),tx=new THREE.Texture(im);im.onload=()=>{tx.needsUpdate=true;};im.src=VK_META[k].tex+'?v=675ccf7902';tx.anisotropy=4;return new THREE.MeshLambertMaterial({map:tx});};
  const by={};for(const p of L.list)(by[p.k]=by[p.k]||[]).push(p);
  const m4=new THREE.Matrix4(),q=new THREE.Quaternion(),e=new THREE.Euler(),v=new THREE.Vector3(),sc=new THREE.Vector3();
  for(const k in by){const arr=by[k],im=new THREE.InstancedMesh(geo(k),mt(k),arr.length);arr.forEach((p,i)=>{const x=t.x+p.x,z=t.y+p.z;q.setFromEuler(e.set(0,p.r,0));m4.compose(v.set(x,hAt(x,z),z),q,sc.set(p.s,p.s,p.s));im.setMatrixAt(i,m4);});
@@ -2193,10 +2193,15 @@ function thAttach(K){const M=TH_META,B=typeof __PK!=='undefined'&&__PK.thPk;if(!
  const bi={};bones.forEach((b,i)=>{bi[b.name.replace('mixamorig:','')]=i;});
  const mw=i=>bones[i].getWorldPosition(new THREE.Vector3()),mq=i=>bones[i].getWorldQuaternion(new THREE.Quaternion());
  const kH=kp(I['DEF-spine']),kF=kp(I['DEF-toe.L']),mH=mw(bi.Hips),mF=mw(bi.LeftToeBase),sc=(kH.y-kF.y)/Math.max(.01,mH.y-mF.y);
+ // bind directions from joint positions (bone axes of the two rigs differ), armature space for Mixamo, kit space for the kit
+ const MB=bones.map((_,i)=>mq(i)),MP=bones.map((_,i)=>mw(i)),KP=i=>kp(i),Y=new THREE.Vector3(0,1,0),L=[],pairs=[];
+ for(const [mn,kn] of TH_MAP){const mi=bi[mn],ki=I[kn];if(mi!==undefined&&ki!==undefined)pairs.push({mn,kn,mi,ki});}
+ const tipOf=mn=>{const m=mn.match(/^(.*?)(\d)$/);if(m&&+m[2]<3)return m[1]+(+m[2]+1);return{Hips:'Spine',Spine:'Spine1',Spine1:'Spine2',Spine2:'Neck',Neck:'Head',LeftShoulder:'LeftArm',RightShoulder:'RightArm',LeftArm:'LeftForeArm',RightArm:'RightForeArm',LeftForeArm:'LeftHand',RightForeArm:'RightHand',LeftHand:'LeftHandMiddle1',RightHand:'RightHandMiddle1',LeftUpLeg:'LeftLeg',RightUpLeg:'RightLeg',LeftLeg:'LeftFoot',RightLeg:'RightFoot',LeftFoot:'LeftToeBase',RightFoot:'RightToeBase'}[mn];};
+ const byN={};pairs.forEach(q=>{byN[q.mn]=q;});const parN={};pairs.forEach(q=>{const pj=M.j[q.mi].p;const pq=pairs.find(z=>z.mi===pj);if(pq)parN[q.mn]=pq;});
+ for(const q of pairs){const t=byN[tipOf(q.mn)];let dM,dK;if(t){dM=MP[t.mi].clone().sub(MP[q.mi]);dK=KP(t.ki).sub(KP(q.ki));}else if(parN[q.mn]){const pq=parN[q.mn];dM=MP[q.mi].clone().sub(MP[pq.mi]);dK=KP(q.ki).sub(KP(pq.ki));}
+  const Mb=MB[q.mi],Kb=K.Bq[q.ki],A=(dM&&dM.lengthSq()>1e-10&&dK.lengthSq()>1e-10)?new THREE.Quaternion().setFromUnitVectors(dM.normalize(),dK.normalize()):new THREE.Quaternion();
+  const O=Kb.clone().invert().multiply(A).multiply(Mb);L.push({mi:q.mi,ki:q.ki,O,par:M.j[q.mi].p,w:new THREE.Quaternion()});}
  root.scale.setScalar(sc);root.position.set(kH.x-mH.x*sc,kF.y-mF.y*sc,kH.z-mH.z*sc);K.holder.add(root);
- const Y=new THREE.Vector3(0,1,0),L=[];
- for(const [mn,kn] of TH_MAP){const mi=bi[mn],ki=I[kn];if(mi===undefined||ki===undefined)continue;const Mb=mq(mi),Kb=K.Bq[ki],A=new THREE.Quaternion().setFromUnitVectors(Y.clone().applyQuaternion(Mb),Y.clone().applyQuaternion(Kb));
-  const O=Kb.clone().invert().multiply(A).multiply(Mb),pi=M.j[mi].p;L.push({mi,ki,O,par:pi,w:new THREE.Quaternion()});}
  const byM={};L.forEach(e=>{byM[e.mi]=e;});
  return {root,mesh,bones,L,byM,hip:bi.Hips,hipB:mH.clone(),kHip:kH.clone(),sc,q:new THREE.Quaternion(),v:new THREE.Vector3()};
 }catch(e){console.warn('th',e);return null;}}
@@ -6619,7 +6624,7 @@ window.claude?.hot?.snapshot?.(()=>({state:running?serialize():null}));
 window.claude?.hot?.ready?window.claude.hot.ready(boot):boot(window.claude?.hot?.data??{});
 </script>
 <div id="pkLoad" style="position:fixed;left:0;right:0;bottom:calc(env(safe-area-inset-bottom,0px) + 18px);text-align:center;z-index:9999;font:600 14px system-ui,sans-serif;color:#f3e6c8;text-shadow:0 1px 3px #000;pointer-events:none">Kraunama… <span id="pkPct">0</span>%</div>
-<script>window.__PK={};(function(){const L={"vegData": "d/veg.bin?v=2da29312ec", "vkPk": "d/vk.bin?v=2da29312ec", "heroAn": "d/anim.bin?v=2da29312ec", "heroPk": "d/hero.bin?v=2da29312ec", "townPk": "d/town.bin?v=2da29312ec", "dragonPk": "d/dragon.bin?v=2da29312ec", "dgkPk": "d/dgk.bin?v=2da29312ec", "zkPk": "d/zk.bin?v=2da29312ec", "thPk": "d/th.bin?v=2da29312ec"},sizes={"vegData": 1878408, "vkPk": 1088548, "heroAn": 662544, "heroPk": 3287460, "townPk": 392700, "dragonPk": 269688, "dgkPk": 1214946, "zkPk": 2064640, "thPk": 267540};let tot=0;const cur={};for(const k in sizes)tot+=sizes[k];
+<script>window.__PK={};(function(){const L={"vegData": "d/veg.bin?v=675ccf7902", "vkPk": "d/vk.bin?v=675ccf7902", "heroAn": "d/anim.bin?v=675ccf7902", "heroPk": "d/hero.bin?v=675ccf7902", "townPk": "d/town.bin?v=675ccf7902", "dragonPk": "d/dragon.bin?v=675ccf7902", "dgkPk": "d/dgk.bin?v=675ccf7902", "zkPk": "d/zk.bin?v=675ccf7902", "thPk": "d/th.bin?v=675ccf7902"},sizes={"vegData": 1878408, "vkPk": 1088548, "heroAn": 662544, "heroPk": 3287460, "townPk": 392700, "dragonPk": 269688, "dgkPk": 1214946, "zkPk": 2064640, "thPk": 267540};let tot=0;const cur={};for(const k in sizes)tot+=sizes[k];
 const pct=()=>{const e=document.getElementById('pkPct');if(e&&tot)e.textContent=Math.min(99,Math.round(Object.values(cur).reduce((a,b)=>a+b,0)/tot*100));};
 const get=(id,u)=>fetch(u).then(r=>{if(!r.ok)throw new Error(u+' '+r.status);if(!r.body||!r.body.getReader)return r.arrayBuffer().then(b=>{cur[id]=b.byteLength;pct();return b;});
  const rd=r.body.getReader(),parts=[];let n=0;const pump=()=>rd.read().then(({done,value})=>{if(done){const o=new Uint8Array(n);let p=0;for(const c of parts){o.set(c,p);p+=c.length;}return o.buffer;}parts.push(value);n+=value.length;cur[id]=n;pct();return pump();});return pump();});
