@@ -1310,7 +1310,7 @@ function buildVK1(t){const L=VK1.L;if(!L)return;const el=document.getElementById
  const geo=k=>{const m=VK_META[k],[o1,o2,o3]=m.o,q=new Int16Array(BUF,o1,m.nv*3),u=new Uint16Array(BUF,o2,m.nv*2),I=m.nv<65536?new Uint16Array(BUF,o3,m.ni):new Uint32Array(BUF,o3,m.ni);
   const P=new Float32Array(m.nv*3),U=new Float32Array(m.nv*2);for(let i=0;i<P.length;i++)P[i]=q[i]/5000;for(let i=0;i<U.length;i++)U[i]=u[i]/65535;
   let g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(P,3));g.setAttribute('uv',new THREE.BufferAttribute(U,2));g.setIndex(new THREE.BufferAttribute(I.slice(),1));g=g.toNonIndexed();g.computeVertexNormals();return g;};
- const mt=k=>{const im=new Image(),tx=new THREE.Texture(im);im.onload=()=>{tx.needsUpdate=true;};im.src=VK_META[k].tex+'?v=5291fa6813';tx.anisotropy=4;return new THREE.MeshLambertMaterial({map:tx});};
+ const mt=k=>{const im=new Image(),tx=new THREE.Texture(im);im.onload=()=>{tx.needsUpdate=true;};im.src=VK_META[k].tex+'?v=4d78224f98';tx.anisotropy=4;return new THREE.MeshLambertMaterial({map:tx});};
  const by={};for(const p of L.list)(by[p.k]=by[p.k]||[]).push(p);
  const m4=new THREE.Matrix4(),q=new THREE.Quaternion(),e=new THREE.Euler(),v=new THREE.Vector3(),sc=new THREE.Vector3();
  for(const k in by){const arr=by[k],im=new THREE.InstancedMesh(geo(k),mt(k),arr.length);arr.forEach((p,i)=>{const x=t.x+p.x,z=t.y+p.z;q.setFromEuler(e.set(0,p.r,0));m4.compose(v.set(x,hAt(x,z),z),q,sc.set(p.s,p.s,p.s));im.setMatrixAt(i,m4);});
@@ -2123,7 +2123,7 @@ const wcol=()=>ws.type===3?RAINBOW[(h.wpI=((h.wpI||0)+1)%6)]:ws.type===2?(Math.r
 }
 const FHAIR={swd:'#e8c46a',war:'#a8402a',arc:'#6a3a1a',sha:'#e4e4f0',dag:'#1e1420'};
 /* ---------- modular skinned hero kit (male heroes) ---------- */
-const HK={ok:null,geo:{},live:new Set(),S:20,twoD:15,noTwo:1,staffA:Math.PI/2,orbUp:7,subdiv:true,reachU:.5,reachF:.45,qvD:7.5,adj:{swd:[{t:[0,.5],p:[-1.2,0,0]}],war:[{t:[0,.3],s:-7}],arc:[null,null],dag:[{p:[-.6,0,0]},{p:[.6,0,0]}],sha:[null]},
+const HK={ok:null,geo:{},live:new Set(),S:20,twoD:15,noTwo:1,staffA:Math.PI/2,orbUp:7,subdiv:true,hiNext:false,reachU:.5,reachF:.45,qvD:7.5,adj:{swd:[{t:[0,.5],p:[-1.2,0,0]}],war:[{t:[0,.3],s:-7}],arc:[null,null],dag:[{p:[-.6,0,0]},{p:[.6,0,0]}],sha:[null]},
  VAR:{swd:'001',arc:'002',war:'003',dag:'004',sha:'005'},SETS:[null,'B','I','G','DS','M'],
  TONE:{swd:'Light',arc:'Light',war:'Medium',dag:'Medium',sha:'Dark'},
  FACE:{swd:['Hair.006','Beard.006','Eyebrows.001'],war:['Hair.009','Beard.009','Eyebrows.004'],arc:['Hair.008','Mustache.009','Eyebrows.003'],dag:['Hair.007','Mustache.008','Eyebrows.002'],sha:['Hair.010','Beard.010','Eyebrows.005']},
@@ -2135,13 +2135,13 @@ function hkInit(){if(HK.ok!==null)return HK.ok;HK.ok=false;try{const el=document
   const B=HK.meta.bones;HK.par=B.map(b=>b.p);HK.idx={};B.forEach((b,i)=>HK.idx[b.n]=i);
   const ord=[],seen=new Set(),vis=i=>{if(seen.has(i))return;if(B[i].p>=0)vis(B[i].p);seen.add(i);ord.push(i);};B.forEach((b,i)=>vis(i));HK.ord=ord;
   HK.ok=true;}catch(e){console.warn('heroKit',e);HK.ok=false;}return HK.ok;}
-function hkGeo(name,uv){const key=name+(uv?'@'+uv.join(','):'');if(HK.geo[key]!==undefined)return HK.geo[key];const r=HK.meta.m[name];if(!r)return HK.geo[key]=null;
+function hkGeo(name,uv,lv){lv=lv===undefined?1:lv;const key=name+(uv?'@'+uv.join(','):'')+'#'+lv;if(HK.geo[key]!==undefined)return HK.geo[key];const r=HK.meta.m[name];if(!r)return HK.geo[key]=null;
  const [nv,ni,o1,o2,o3,o4,o5]=r,buf=HK.buf,q=new Int16Array(buf,o1,nv*3),P=new Float32Array(nv*3);for(let i=0;i<P.length;i++)P[i]=q[i]*1e-4;
  const U=new Float32Array(nv*2);if(uv){for(let i=0;i<nv;i++){U[i*2]=uv[0];U[i*2+1]=uv[1];}}else{const u8=new Uint8Array(buf,o2,nv*2);for(let i=0;i<U.length;i++)U[i]=u8[i]/255;}
  const J=new Uint16Array(nv*4),j8=new Uint8Array(buf,o3,nv*4);for(let i=0;i<J.length;i++)J[i]=j8[i];const W=new Float32Array(nv*4),w8=new Uint8Array(buf,o4,nv*4);for(let i=0;i<W.length;i++)W[i]=w8[i]/255;
  const I=nv<65536?new Uint16Array(buf,o5,ni):new Uint32Array(buf,o5,ni);
  const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(P,3));g.setAttribute('uv',new THREE.BufferAttribute(U,2));g.setAttribute('skinIndex',new THREE.BufferAttribute(J,4));g.setAttribute('skinWeight',new THREE.BufferAttribute(W,4));
- g.setIndex(new THREE.BufferAttribute(I.slice(),1));g.computeVertexNormals();hkSmooth(g,P,nv);if(HK.subdiv)try{hkSubdiv(g);}catch(e){console.warn('subdiv',e);}g.boundingSphere=new THREE.Sphere(new THREE.Vector3(0,1,0),1.35);return HK.geo[key]=g;}
+ g.setIndex(new THREE.BufferAttribute(I.slice(),1));g.computeVertexNormals();hkSmooth(g,P,nv);if(HK.subdiv)try{for(let i=0;i<lv;i++)hkSubdiv(g);}catch(e){console.warn('subdiv',e);}g.boundingSphere=new THREE.Sphere(new THREE.Vector3(0,1,0),1.35);return HK.geo[key]=g;}
 // smooth shading: vertices split by UV seams share one averaged normal unless the surfaces meet at a sharp angle (crease ~55°)
 // one level of curved (PN-triangle) subdivision: every triangle becomes 4, new edge points bulge along the vertex normals,
 // original vertices stay put (so clothes keep fitting); sharp creases stay straight; UVs and skin weights are blended
@@ -2168,7 +2168,7 @@ function hkAttach(p,cls){if(!hkInit()||!HK.VAR[cls])return;try{
  const holder=new THREE.Group(),roots=[];B.forEach((b,i)=>{if(b.p>=0)bones[b.p].add(bones[i]);else roots.push(bones[i]);});roots.forEach(r=>holder.add(r));holder.updateMatrixWorld(true);
  const skel=new THREE.Skeleton(bones),n=bones.length,Bq=bones.map(b=>b.getWorldQuaternion(new THREE.Quaternion())),lq0=bones.map(b=>b.quaternion.clone()),t0=bones.map(b=>b.position.clone());
  bones.forEach((b,i)=>{const nm=b.name;if(nm.startsWith('DEF-f_'))lq0[i].multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1,0,0),1.1));else if(nm==='DEF-thumb.02.L'||nm==='DEF-thumb.03.L'||nm==='DEF-thumb.02.R'||nm==='DEF-thumb.03.R')lq0[i].multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1,0,0),.55));});
- const K={holder,bones,skel,Bq,lq0,t0,parts:{},cls,WQ:bones.map(()=>new THREE.Quaternion()),WP:bones.map(()=>new THREE.Vector3()),drv:new Array(n).fill(null)};
+ const K={hi:HK.hiNext,holder,bones,skel,Bq,lq0,t0,parts:{},cls,WQ:bones.map(()=>new THREE.Quaternion()),WP:bones.map(()=>new THREE.Vector3()),drv:new Array(n).fill(null)};
  const I=HK.idx,zq=a=>new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,0,1),a),RL=zq(-Math.PI/2),RR=zq(Math.PI/2);
  const D=(name,a,f,R)=>{const i=I[name];if(i===undefined||!a)return;const C=(R?R.clone():new THREE.Quaternion()).multiply(Bq[i]);K.drv[i]={a,f,C,Ci:C.clone().invert(),d:new THREE.Quaternion()};};
  D('DEF-upper_arm.R',p.arms[0],null,RR);D('DEF-forearm.R',p.arms[0],p.arms[0].userData.fore,RR);D('DEF-upper_arm.L',p.arms[1],null,RL);D('DEF-forearm.L',p.arms[1],p.arms[1].userData.fore,RL);
@@ -2177,7 +2177,7 @@ function hkAttach(p,cls){if(!hkInit()||!HK.VAR[cls])return;try{
  K.sock=[I['Weapon_Socket.R'],I['Weapon_Socket.L']];K.back=I['WeaponBack_Socket.R'];K.chest=I['DEF-spine.003'];K.neck=I['DEF-spine.004'];K.handB=[I['DEF-hand.R'],I['DEF-hand.L']];K.wr0=[0,1].map(k=>{const F=k?I['DEF-forearm.L']:I['DEF-forearm.R'],H=k?I['DEF-hand.L']:I['DEF-hand.R'];return Bq[F].clone().invert().multiply(Bq[H]).invert();});K.armB=[[I['DEF-upper_arm.R'],I['DEF-forearm.R']],[I['DEF-upper_arm.L'],I['DEF-forearm.L']]];K.fist=[new THREE.Vector3(.47,-7.4,0),new THREE.Vector3(-.47,-7.4,0)];K.arm0=p.arms.map(a=>a.position.clone());
  holder.scale.setScalar(HK.S);holder.position.y=-((p.lift&&p.lift.userData.y0)||4.6);p.body.add(holder);p.kit=K;p.kitOn=true;HK.live.add(p);
  hkGear(p,{});}catch(e){console.warn('hkAttach',e);p.kit=null;p.kitOn=false;}}
-function hkPart(p,name,uv){const K=p.kit,key=name+(uv?'@':'');let m=K.parts[key];if(m!==undefined)return m;const g=hkGeo(name,uv);if(!g)return K.parts[key]=null;
+function hkPart(p,name,uv){const K=p.kit,key=name+(uv?'@':'');let m=K.parts[key];if(m!==undefined)return m;const g=hkGeo(name,uv,K.hi?2:1);if(!g)return K.parts[key]=null;
  m=new THREE.SkinnedMesh(g,HK.mat);m.castShadow=true;m.receiveShadow=true;K.holder.add(m);m.bind(K.skel,new THREE.Matrix4());m.visible=false;return K.parts[key]=m;}
 function hkVT(it){if(!it)return -1;if((it.tier||0)>=5)return 5;const l=it.lvl||((it.tier||1)*15);return l<=10?0:l<=24?1:l<=40?2:l<=55?3:l<=60?4:5;}
 function hkGear(h,e){const K=h.kit;if(!K)return;const cls=K.cls,v=HK.VAR[cls],S=HK.SETS,tone=HK.TONE[cls];e=e||{};
@@ -5600,7 +5600,7 @@ function ensurePreview(){
   pv.canvas.addEventListener('pointerdown',e=>{pv.drag={x:e.clientX,r:pv.rot};try{pv.canvas.setPointerCapture(e.pointerId);}catch(_){}});
   pv.canvas.addEventListener('pointermove',e=>{if(pv.drag)pv.rot=pv.drag.r+(e.clientX-pv.drag.x)*.015;});
   const end=()=>{pv.drag=null;};pv.canvas.addEventListener('pointerup',end);pv.canvas.addEventListener('pointercancel',end);}
- if(!pv.hero||pv.hero.cls!==P.cls||pv.hero.fem!==(P.sex==='f')){if(pv.hero)pv.scene.remove(pv.hero.root);pv.hero=makeHero(P.cls,P.sex);pv.scene.add(pv.hero.root);}
+ if(!pv.hero||pv.hero.cls!==P.cls||pv.hero.fem!==(P.sex==='f')){if(pv.hero)pv.scene.remove(pv.hero.root);HK.hiNext=true;pv.hero=makeHero(P.cls,P.sex);HK.hiNext=false;pv.scene.add(pv.hero.root);}
  applyGear(pv.hero);return true;
 }
 function renderPreview(dt){
@@ -6183,7 +6183,7 @@ function selInit(){if(SEL.r||!SEL.ok)return!!SEL.r;if(typeof THREE==='undefined'
  return true;}
 function showcaseEq(k){const it=(slot,tier,rar)=>({slot,cls:k,tier,idx:1,rar,lvl:25});const e={weapon:it('weapon',3,2),helm:it('helm',3,1),chest:it('chest',3,1),shoulders:it('shoulders',3,1),gloves:it('gloves',3,1),pants:it('pants',3,1),boots:it('boots',3,1),cape:{slot:'cape',tier:3,rar:1}};if(k!=='dag'&&k!=='war')e.offhand=it('offhand',3,1);return e;}
 function selSetHero(k){if(!selInit())return;const sv=ST.saves[k],sex=stSex(k);if(SEL.hero&&SEL.k===k&&SEL.hero.fem===(sex==='f'))return;
- if(SEL.hero)SEL.scene.remove(SEL.hero.root);const h=makeHero(k,sex);const eq=sv&&sv.P.eq?Object.assign({},sv.P.eq):showcaseEq(k);applyGear(h,eq);SEL.hero=h;SEL.k=k;SEL.scene.add(h.root);SEL.spawnT=0;
+ if(SEL.hero)SEL.scene.remove(SEL.hero.root);HK.hiNext=true;const h=makeHero(k,sex);HK.hiNext=false;const eq=sv&&sv.P.eq?Object.assign({},sv.P.eq):showcaseEq(k);applyGear(h,eq);SEL.hero=h;SEL.k=k;SEL.scene.add(h.root);SEL.spawnT=0;
  const col=new THREE.Color(CL[k].trim||'#ffd27a');SEL.ring.material.color.copy(col);SEL.runes.material.color.copy(col).lerp(new THREE.Color('#ffffff'),.4);SEL.beam.material.color.copy(col).lerp(new THREE.Color('#ffffff'),.5);
  for(const m of SEL.motes)m.material.color.copy(col).lerp(new THREE.Color('#ffffff'),Math.random()*.5);}
 function renderSel(dt){if(!SEL.r||!SEL.hero)return;const host=$('#selStage');if(SEL.canvas.parentNode!==host)host.appendChild(SEL.canvas);
@@ -6284,7 +6284,7 @@ function startGame(s,cls,name,sex){
  if(s){const tw=TOWNS[P.town]||TOWNS[0];P.x=tw.x;P.y=tw.y+80;}
  P.buffs={};P.cds=[0,0,0,0,0,0,0,0,0];P.atkCd=0;P.potCd=0;P.pcd={hp:0,mp:0};if(P.autoPot===undefined)P.autoPot=true;P.swing=0;P.spin=0;P.hurt=0;P.fa=-Math.PI/2;P.target=null;P.engage=false;P.dead=false;P.goNpc=null;
  const S=stats();if(!s){P.hp=S.mhp;P.mp=S.mmp;}P.hp=clamp(P.hp,1,S.mhp);P.mp=clamp(P.mp,0,S.mmp);
- if(heroObj)scene.remove(heroObj.root);heroObj=makeHero(P.cls,P.sex);shadowize(heroObj.root);scene.add(heroObj.root);refreshHeroGear();P.dying=0;
+ if(heroObj)scene.remove(heroObj.root);HK.hiNext=true;heroObj=makeHero(P.cls,P.sex);HK.hiNext=false;shadowize(heroObj.root);scene.add(heroObj.root);refreshHeroGear();P.dying=0;
  for(const p of proj)scene.remove(p.obj);proj=[];for(const e of fx)removeFx(e);fx=[];timers=[];
  if(CV){scene.remove(CV.obj);CV=null;}if(PT){scene.remove(PT.obj);PT=null;}thiefT=20;
  spawnAll();tbInit();initBots();P.riding=false;horseObj&&scene.remove(horseObj.root);horseObj=null;setTimeout(updRideBtn,50);curTown=townAt(P);camT.x=P.x;camT.y=P.y;
@@ -6318,7 +6318,7 @@ window.claude?.hot?.snapshot?.(()=>({state:running?serialize():null}));
 window.claude?.hot?.ready?window.claude.hot.ready(boot):boot(window.claude?.hot?.data??{});
 </script>
 <div id="pkLoad" style="position:fixed;left:0;right:0;bottom:calc(env(safe-area-inset-bottom,0px) + 18px);text-align:center;z-index:9999;font:600 14px system-ui,sans-serif;color:#f3e6c8;text-shadow:0 1px 3px #000;pointer-events:none">Kraunama… <span id="pkPct">0</span>%</div>
-<script>window.__PK={};(function(){const L={"vegData": "d/veg.bin?v=5291fa6813", "vkPk": "d/vk.bin?v=5291fa6813", "heroAn": "d/anim.bin?v=5291fa6813", "heroPk": "d/hero.bin?v=5291fa6813", "townPk": "d/town.bin?v=5291fa6813", "dragonPk": "d/dragon.bin?v=5291fa6813", "dgkPk": "d/dgk.bin?v=5291fa6813"},sizes={"vegData": 1878408, "vkPk": 1088548, "heroAn": 662544, "heroPk": 3287460, "townPk": 392700, "dragonPk": 269688, "dgkPk": 1214946};let tot=0;const cur={};for(const k in sizes)tot+=sizes[k];
+<script>window.__PK={};(function(){const L={"vegData": "d/veg.bin?v=4d78224f98", "vkPk": "d/vk.bin?v=4d78224f98", "heroAn": "d/anim.bin?v=4d78224f98", "heroPk": "d/hero.bin?v=4d78224f98", "townPk": "d/town.bin?v=4d78224f98", "dragonPk": "d/dragon.bin?v=4d78224f98", "dgkPk": "d/dgk.bin?v=4d78224f98"},sizes={"vegData": 1878408, "vkPk": 1088548, "heroAn": 662544, "heroPk": 3287460, "townPk": 392700, "dragonPk": 269688, "dgkPk": 1214946};let tot=0;const cur={};for(const k in sizes)tot+=sizes[k];
 const pct=()=>{const e=document.getElementById('pkPct');if(e&&tot)e.textContent=Math.min(99,Math.round(Object.values(cur).reduce((a,b)=>a+b,0)/tot*100));};
 const get=(id,u)=>fetch(u).then(r=>{if(!r.ok)throw new Error(u+' '+r.status);if(!r.body||!r.body.getReader)return r.arrayBuffer().then(b=>{cur[id]=b.byteLength;pct();return b;});
  const rd=r.body.getReader(),parts=[];let n=0;const pump=()=>rd.read().then(({done,value})=>{if(done){const o=new Uint8Array(n);let p=0;for(const c of parts){o.set(c,p);p+=c.length;}return o.buffer;}parts.push(value);n+=value.length;cur[id]=n;pct();return pump();});return pump();});
